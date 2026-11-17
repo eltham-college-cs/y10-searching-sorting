@@ -1,0 +1,982 @@
+<!doctype html>
+<html lang="en-GB">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Binary Search Code Builder · Y10 Searching and Sorting L2</title>
+<style>
+/* Layout: Eltham workbook frame (navy band header, white section cards). Each task = a stack of
+   one-line build rows, then the whole program assembled underneath with braces added automatically. */
+:root{
+  --navy9:#0A1B2E;--navy7:#163351;--navy5:#2A5A8C;--navy1:#D7E3EF;
+  --gold5:#C89B3C;--gold3:#E3C783;--gold7:#8A6520;
+  --paper:#F7F8FA;--card:#FFFFFF;--ink:#1A1D21;--muted:#555D68;--line:#E3E8EF;--frame:#B9C3CF;
+  --ok:#1F7A4D;--okbg:#E6F4EC;--bad:#B3261E;--badbg:#FCE9E7;--warn:#8A5A00;--warnbg:#FDF1D9;
+  --code-bg:#0E2033;--code-fg:#E4EAF1;--code-dim:#5E7389;--code-kw:#6FB3F2;--code-str:#E8A17A;--code-num:#B5CEA8;--code-fn:#E7DB9B;--code-type:#5FD1BC;--code-brace:#C89B3C;
+  --display:Georgia,"Times New Roman",serif;
+  --body:system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;
+  --mono:ui-monospace,"Cascadia Mono",Consolas,"SF Mono",Menlo,monospace;
+  color-scheme:light;
+}
+*{box-sizing:border-box}
+html,body{margin:0}
+[hidden]{display:none!important}
+img{max-width:100%}
+body{background:var(--paper);color:var(--ink);font:16px/1.45 var(--body)}
+h1,h2,h3{font-family:var(--display);color:var(--navy9);font-weight:400;margin:0;text-wrap:balance}
+.wrap{max-width:1040px;margin:0 auto;padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px));padding-block:0 64px}
+header.top{background:var(--navy9);color:#fff;margin-bottom:22px}
+header.top .wrap{padding-block:22px 26px}
+.kicker{font-size:13px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:var(--gold3)}
+header.top h1{color:#fff;font-size:clamp(30px,5vw,44px);margin:6px 0 10px}
+header.top p{color:var(--navy1);margin:0;max-width:720px}
+.idrow{display:flex;flex-wrap:wrap;gap:12px;margin-top:16px;align-items:flex-end}
+.idrow label{display:flex;flex-direction:column;font-size:12px;font-weight:700;letter-spacing:.08em;color:var(--gold3)}
+.idrow input{margin-top:4px;padding:8px 10px;border-radius:8px;border:1px solid var(--navy5);background:var(--navy7);color:#fff;font:inherit;min-width:200px}
+.teacherbar{margin-top:14px;display:none;gap:10px;flex-wrap:wrap;align-items:center;background:var(--navy7);border:1px dashed var(--gold5);border-radius:10px;padding:8px 12px;color:var(--gold3);font-size:14px}
+body.teacher .teacherbar{display:flex}
+.teacherbar code{background:var(--navy9);color:#fff;padding:2px 8px;border-radius:6px;font-family:var(--mono)}
+
+section.act{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:20px 22px;margin-bottom:22px}
+section.act>header{display:flex;flex-wrap:wrap;align-items:center;gap:8px;margin-bottom:10px}
+section.act>header h2{font-size:28px;margin-right:6px}
+.num{display:inline-block;width:30px;height:30px;border-radius:15px;background:var(--gold5);color:var(--navy9);text-align:center;line-height:30px;font-weight:700;font-size:15px}
+.pill{display:inline-block;font-size:12px;font-weight:700;letter-spacing:.06em;padding:4px 10px;border-radius:999px;background:var(--gold5);color:var(--navy9)}
+.pill.navy{background:var(--navy9);color:var(--gold3)}
+.pill.model{background:#E3EEFB;color:#2F6FD6}
+.badge{margin-left:auto;font-size:13px;font-weight:700;color:var(--muted)}
+.badge.done{color:var(--ok)}
+.howto{color:var(--muted);font-size:15px;margin:0 0 14px;max-width:70ch}
+.rules{display:flex;flex-wrap:wrap;gap:8px;margin:0 0 16px}
+.rules span{font-size:13px;background:var(--warnbg);color:var(--warn);border-radius:8px;padding:5px 10px;font-weight:600}
+
+/* locked */
+.lockpanel{display:none}
+section.locked .lockpanel{display:flex;flex-wrap:wrap;gap:10px;align-items:center;background:var(--paper);border:2px dashed var(--frame);border-radius:10px;padding:14px}
+section.locked .lockpanel p{margin:0;flex-basis:100%;color:var(--muted)}
+section.locked .secbody{display:none}
+.lockpanel input{font:inherit;font-family:var(--mono);text-transform:uppercase;padding:8px 10px;border-radius:8px;border:1px solid var(--frame);width:140px}
+.lockmsg{color:var(--bad);font-weight:700;font-size:14px}
+
+/* build rows */
+.rows{display:flex;flex-direction:column;gap:8px}
+.row{display:grid;grid-template-columns:34px minmax(0,1fr);gap:10px;align-items:start;border:1px solid var(--line);border-radius:10px;padding:10px 12px;background:var(--card);transition:background .15s,border-color .15s}
+.row .ln{width:30px;height:30px;border-radius:15px;background:var(--navy9);color:var(--gold3);font-weight:700;font-size:14px;display:flex;align-items:center;justify-content:center;font-variant-numeric:tabular-nums}
+.row .main{min-width:0;display:flex;flex-direction:column;gap:6px}
+.row .task{font-weight:600;color:var(--navy9)}
+.row .task code,.howto code,.fb code,.hintbox code{font-family:var(--mono);font-size:.92em;background:var(--paper);border:1px solid var(--line);border-radius:5px;padding:0 4px;color:var(--navy7)}
+.erl{font-family:var(--mono);font-size:13px;color:#1F4FA8;background:#EEF3FB;border-radius:6px;padding:3px 8px;align-self:flex-start;max-width:100%;overflow-x:auto;white-space:pre}
+.erl b{font-family:var(--body);font-size:11px;letter-spacing:.08em;color:var(--navy5);margin-right:6px}
+.entry{display:flex;gap:8px;align-items:center;flex-wrap:wrap}
+.indent{font-family:var(--mono);color:var(--frame);font-size:14px;white-space:pre;user-select:none}
+.entry input{flex:1 1 280px;min-width:0;font-family:var(--mono);font-size:15px;padding:8px 10px;border-radius:8px;border:1.5px solid var(--frame);background:#FBFCFD;color:var(--ink)}
+.entry input:focus{outline:3px solid var(--gold3);outline-offset:1px;border-color:var(--navy5)}
+.entry input:disabled{background:var(--paper);color:var(--muted)}
+.row.right{background:var(--okbg);border-color:#BFE0CC}
+.row.right input{border-color:var(--ok);background:#fff}
+.row.wrong{background:var(--badbg);border-color:#F2C2BD}
+.row.wrong input{border-color:var(--bad)}
+.row.waiting{opacity:.55}
+.row.given{background:var(--paper)}
+.row.given .ln{background:var(--frame);color:#fff}
+.row.note{background:transparent;border-style:dashed;padding:6px 12px}
+.row.note .ln{background:transparent;color:var(--gold7)}
+.givencode{font-family:var(--mono);font-size:14px;color:var(--navy7);white-space:pre;overflow-x:auto}
+.givenlabel{font-size:12px;font-weight:700;letter-spacing:.06em;color:var(--muted);text-transform:uppercase}
+button.btn{font:inherit;font-weight:700;font-size:14px;border-radius:8px;padding:8px 14px;cursor:pointer;border:1px solid var(--navy9);background:var(--navy9);color:#fff}
+button.btn.ghost{background:#fff;color:var(--navy9)}
+button.btn.gold{background:var(--gold5);border-color:var(--gold5);color:var(--navy9)}
+button.btn.model{display:none;background:#E3EEFB;border-color:#2F6FD6;color:#2F6FD6}
+body.teacher button.btn.model{display:inline-block}
+button.btn:disabled{opacity:.45;cursor:default}
+button.btn:focus-visible{outline:3px solid var(--gold3);outline-offset:2px}
+.fb{font-size:15px;font-weight:600;min-height:0}
+.fb.good{color:var(--ok)}
+.fb.bad{color:var(--bad)}
+.fb.tip{color:var(--warn)}
+.hintbox{font-size:14px;color:var(--warn);background:var(--warnbg);border-radius:8px;padding:6px 10px}
+
+/* assembled program */
+.prog{margin-top:18px}
+.proghead{display:flex;flex-wrap:wrap;gap:10px;align-items:center;justify-content:space-between;margin-bottom:8px}
+.proghead h3{font-size:20px}
+.legend{font-size:13px;color:var(--muted);display:flex;gap:14px;flex-wrap:wrap}
+.legend i{font-style:normal;font-family:var(--mono);font-weight:700}
+.code{background:var(--code-bg);color:var(--code-fg);border-radius:12px;padding:14px 0;overflow-x:auto;font-family:var(--mono);font-size:14.5px;line-height:1.6}
+.code .cl{display:flex;white-space:pre;padding:0 16px;min-width:max-content}
+.code .cl .src{white-space:pre}
+.code .cl .g{color:var(--code-dim);width:2.5em;text-align:right;margin-right:1.2em;flex:none;user-select:none}
+.code .cl.cur{background:rgba(200,155,60,.18);box-shadow:inset 4px 0 0 var(--gold5)}
+.code .ph{color:var(--code-dim);font-style:italic}
+.code .br{color:var(--code-brace);opacity:.85}
+.code .k{color:var(--code-kw)}.code .s{color:var(--code-str)}.code .n{color:var(--code-num)}.code .f{color:var(--code-fn)}.code .t{color:var(--code-type)}
+.donebar{display:none;margin-top:14px;background:var(--navy9);color:#fff;border-radius:12px;padding:14px 16px;gap:12px;flex-wrap:wrap;align-items:center}
+.donebar.on{display:flex}
+.donebar p{margin:0;color:var(--navy1);flex:1 1 260px}
+.donebar strong{color:var(--gold3)}
+.tryit{display:none;margin-top:12px;border:1px solid var(--line);border-radius:10px;padding:12px 14px;background:var(--paper)}
+.tryit.on{display:block}
+.tryit h3{font-family:var(--body);font-size:13px;font-weight:700;letter-spacing:.08em;color:var(--gold7);text-transform:uppercase;margin-bottom:8px}
+.tryrow{display:flex;gap:8px;flex-wrap:wrap;align-items:center}
+.tryrow textarea{font-family:var(--mono);font-size:14px;padding:6px 8px;border-radius:8px;border:1px solid var(--frame);min-width:0;flex:0 1 260px;height:60px;resize:vertical}
+.console{font-family:var(--mono);font-size:14px;background:var(--code-bg);color:#7FD49B;border-radius:8px;padding:8px 12px;flex:1 1 220px;min-height:38px;white-space:pre-wrap}
+.unlockcode{flex-basis:100%;border-top:1px solid var(--navy5);padding-top:10px;color:var(--navy1);font-size:15px}
+.unlockcode b{font-family:var(--mono);font-size:18px;letter-spacing:.12em;color:var(--navy9);background:var(--gold3);padding:2px 10px;border-radius:6px;margin-left:6px}
+details.trace{margin-top:14px;border:1px solid var(--line);border-radius:10px;background:var(--card)}
+details.trace summary{cursor:pointer;padding:12px 14px;font-weight:700;color:var(--navy9);display:flex;gap:10px;align-items:center;flex-wrap:wrap;list-style:none}
+details.trace summary::-webkit-details-marker{display:none}
+details.trace summary::before{content:"▸";color:var(--gold5);transition:transform .15s}
+details.trace[open] summary::before{transform:rotate(90deg)}
+details.trace summary .pill{margin-left:0}
+.tbadge{margin-left:auto;font-size:13px;font-weight:700;color:var(--muted)}
+.tbadge.done{color:var(--ok)}
+.tbody{padding:0 14px 14px;display:flex;flex-direction:column;gap:10px}
+.tdata{font-family:var(--mono);font-size:14px;background:var(--paper);border:1px solid var(--line);border-radius:8px;padding:6px 10px;align-self:flex-start;max-width:100%;overflow-x:auto;white-space:pre}
+.tscroll{overflow-x:auto}
+table.tt{border-collapse:collapse;min-width:100%;font-variant-numeric:tabular-nums}
+table.tt th{background:var(--navy9);color:#fff;font-family:var(--mono);font-weight:600;font-size:14px;padding:7px 10px;text-align:center;white-space:nowrap}
+table.tt td{border:1px solid var(--line);padding:4px}
+table.tt input{width:100%;min-width:64px;font-family:var(--mono);font-size:15px;text-align:center;padding:6px;border-radius:6px;border:1.5px solid var(--frame);background:#FBFCFD;color:var(--ink)}
+table.tt input:focus{outline:3px solid var(--gold3);outline-offset:0}
+table.tt input.right{border-color:var(--ok);background:var(--okbg)}
+table.tt input.wrong{border-color:var(--bad);background:var(--badbg)}
+.tout{display:flex;gap:10px;align-items:center;flex-wrap:wrap}
+.tout label{font-weight:700;color:var(--navy9);font-size:14px}
+.tout input{font-family:var(--mono);font-size:15px;padding:6px 8px;border-radius:6px;border:1.5px solid var(--frame);flex:0 1 240px;min-width:0}
+.tout input.right{border-color:var(--ok);background:var(--okbg)}
+.tout input.wrong{border-color:var(--bad);background:var(--badbg)}
+.status{font-size:13px;color:var(--muted);margin-top:24px;display:flex;gap:10px;flex-wrap:wrap;align-items:center}
+@media (max-width:640px){
+  section.act{padding:16px 12px}
+  section.act>header h2{font-size:23px}
+  .row{grid-template-columns:28px minmax(0,1fr);padding:8px}
+  .row .ln{width:26px;height:26px;font-size:13px}
+  .indent{display:none}
+}
+/* segment tags (same colours as the slides) */
+.seg{align-self:flex-start;font-size:11.5px;font-weight:700;letter-spacing:.05em;text-transform:uppercase;color:#fff;border-radius:6px;padding:2px 8px}
+/* briefs (2.3, 2.4) */
+h3.sub{font-size:20px;margin:18px 0 8px}
+h3.sub .mini{font-family:var(--body);font-size:13px;color:var(--muted);margin-left:8px}
+.twocol{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:18px}
+.console.sample{color:#E4EAF1;font-size:14px;line-height:1.5}
+ol.steps{margin:0;padding-left:22px;display:flex;flex-direction:column;gap:8px}
+ol.steps code,.reqs code,ul.ext code,label.q code{font-family:var(--mono);font-size:.92em;background:var(--paper);border:1px solid var(--line);border-radius:5px;padding:0 4px;color:var(--navy7)}
+button.btn.sm{padding:4px 10px;font-size:13px}
+.reqs{display:flex;flex-direction:column;gap:6px}
+.req{display:flex;gap:10px;align-items:flex-start;border:1px solid var(--line);border-radius:10px;padding:9px 12px;cursor:pointer}
+.req input{width:20px;height:20px;margin-top:1px;accent-color:var(--ok);flex:none}
+.req:has(input:checked){background:var(--okbg);border-color:#BFE0CC}
+.req b{color:var(--gold7);margin-right:4px}
+.code.small{font-size:13.5px;padding:10px 0}
+table.plan td{padding:6px 8px;font-size:14px}
+table.plan input,table.res input{text-align:left}
+table.res th.rowh{background:var(--paper);color:var(--navy9)}
+table.res td.times{text-align:center;font-weight:700;color:var(--ok);font-family:var(--mono)}
+ul.ext{margin:0;padding-left:20px;display:flex;flex-direction:column;gap:6px}
+ul.ext b{color:var(--gold7)}
+label.q{display:flex;flex-direction:column;gap:6px;margin-bottom:12px;font-weight:600;color:var(--navy9)}
+label.q textarea{font:inherit;font-weight:400;padding:8px 10px;border-radius:8px;border:1.5px solid var(--frame);resize:vertical}
+.bar{display:flex;gap:10px;align-items:center;flex-wrap:wrap;margin-top:6px}
+@media (max-width:760px){.twocol{grid-template-columns:1fr}}
+@media (prefers-reduced-motion:reduce){*{transition:none!important}}
+</style>
+</head>
+<body>
+<header class="top"><div class="wrap">
+  <div class="kicker">Year 10 · OCR J277 2.1.3 · Searching algorithms · Lesson 2</div>
+  <h1>Binary Search Code Builder</h1>
+  <p>Build binary search one line at a time (2.1), turn it into a function (2.2), then use your function to make a game (2.3) and race it against linear search (2.4). You never type a curly bracket <b>{ }</b> for a block in 2.1 and 2.2: they are added for you.</p>
+  <div class="idrow">
+    <label>NAME<input id="who" type="text" autocomplete="off" placeholder="First name and surname"></label>
+    <label>CLASS<input id="cls" type="text" autocomplete="off" placeholder="10C"></label>
+  </div>
+  <div class="teacherbar" id="teacherbar">Teacher mode. Unlock codes: Task 2.2 <code>HALVE</code> · Task 2.3 <code>MIDDLE</code> (2.4 opens when 2.2 is complete). Use ▶ Model to type a line live.</div>
+</div></header>
+
+<main class="wrap" id="app"></main>
+
+<script type="text/plain" id="expsrc">
+using System;
+using System.Diagnostics;
+
+class Program
+{
+    static long comparisons = 0;
+
+    // Linear search (from Lesson 1) - already done for you
+    static int LinearSearch(int[] items, int target)
+    {
+        for (int i = 0; i < items.Length; i++)
+        {
+            comparisons++;
+            if (items[i] == target)
+            {
+                return i;
+            }
+        }
+        return -1;
+    }
+
+    // ===== STEP 1: delete this function and paste YOUR BinarySearch from Task 2.2 here =====
+    // ===== STEP 2: add the line  comparisons++;  as the FIRST line inside your while loop =====
+    static int BinarySearch(int[] items, int target)
+    {
+        return -1;
+    }
+
+    // Runs one search 100 times and returns the average time in microseconds
+    static double TimeSearch(bool binary, int[] items, int target)
+    {
+        int repeats = 100;
+        if (binary) BinarySearch(items, target); else LinearSearch(items, target);   // warm-up (not timed)
+        comparisons = 0;
+        Stopwatch timer = Stopwatch.StartNew();
+        for (int r = 0; r < repeats; r++)
+        {
+            if (binary) BinarySearch(items, target); else LinearSearch(items, target);
+        }
+        timer.Stop();
+        comparisons = comparisons / repeats;
+        return timer.Elapsed.TotalMilliseconds * 1000 / repeats;
+    }
+
+    static void Main()
+    {
+        // Check your BinarySearch works before timing it
+        int[] small = { 2, 4, 6, 8, 10, 12, 14 };
+        bool ok = BinarySearch(small, 7) == -1 && BinarySearch(small, 1) == -1 && BinarySearch(small, 15) == -1;
+        for (int i = 0; i < small.Length; i++)
+        {
+            if (BinarySearch(small, small[i]) != i) ok = false;
+        }
+        if (!ok)
+        {
+            Console.WriteLine("Your BinarySearch gave a wrong answer. Fix it (Task 2.2) and run again.");
+            return;
+        }
+        Console.WriteLine("Your BinarySearch passed the check.");
+
+        // ===== CHANGE THIS: try 1000, 10000, 100000, 1000000 =====
+        int size = 1000000;
+
+        // The SAME sorted list as Lesson 1: 0, 2, 4, 6 ...
+        int[] items = new int[size];
+        for (int i = 0; i < size; i++)
+        {
+            items[i] = i * 2;
+        }
+
+        int[] targets = { 0, size, (size - 1) * 2, 7 };
+        string[] labels = { "First item ", "Middle item", "Last item  ", "Not in list" };
+
+        Console.WriteLine();
+        Console.WriteLine("LINEAR vs BINARY   list size: " + size);
+        Console.WriteLine("Target        Linear checks   Linear us   Binary checks   Binary us");
+
+        for (int t = 0; t < targets.Length; t++)
+        {
+            double linTime = TimeSearch(false, items, targets[t]);
+            long linChecks = comparisons;
+            double binTime = TimeSearch(true, items, targets[t]);
+            long binChecks = comparisons;
+            Console.WriteLine(labels[t] + "   " + linChecks.ToString().PadLeft(13) + "   " + linTime.ToString("0.000").PadLeft(9)
+                + "   " + binChecks.ToString().PadLeft(13) + "   " + binTime.ToString("0.000").PadLeft(9));
+        }
+    }
+}
+</script>
+<script>
+/* ============================================================ helpers */
+const $ = (s, el = document) => el.querySelector(s), $$ = (s, el = document) => [...el.querySelectorAll(s)];
+const esc = s => String(s).replace(/[&<>"]/g, c => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));
+const KEY = "y10-binary-builder-v1";
+let S; try { S = JSON.parse(localStorage.getItem(KEY) || "{}"); } catch (e) { S = {}; }
+S.ans = S.ans || {}; S.unlocked = S.unlocked || ["1"]; S.tries = S.tries || {};
+let saveT; function save(){ clearTimeout(saveT); saveT = setTimeout(() => { try { localStorage.setItem(KEY, JSON.stringify(S)); } catch (e) {} }, 150); }
+const TEACHER = /(^|[#?&])teacher\b/.test(location.hash + location.search);
+if (TEACHER) document.body.classList.add("teacher");
+
+/* unlock codes are stored hashed */
+const LOCKS = {"2": lhashRaw("HALVE"), "3": lhashRaw("MIDDLE")};
+const NEXTCODE = {"1": "HALVE", "2": "MIDDLE"};
+const NEXTLABEL = {"1": "2.2", "2": "2.3"};
+function lhashRaw(s){ let x = 0x811c9dc5; for (const ch of "y10bs:" + s){ x ^= ch.charCodeAt(0); x = Math.imul(x, 0x01000193) >>> 0; } return x.toString(16).padStart(8, "0"); }
+
+/* ============================================================ tokeniser */
+const OPS = ["==","!=","<=",">=","++","--","&&","||","+=","-=","*=","/="];
+function tokens(src){
+  const out = []; let i = 0;
+  while (i < src.length){
+    const c = src[i];
+    if (/\s/.test(c)){ i++; continue; }
+    if (c === '"' || c === "'"){ let j = i + 1; while (j < src.length && src[j] !== c){ if (src[j] === "\\") j++; j++; } out.push({v: src.slice(i, j + 1), str: true, closed: j < src.length}); i = j + 1; continue; }
+    if (/[A-Za-z_]/.test(c)){ let j = i; while (j < src.length && /[A-Za-z0-9_]/.test(src[j])) j++; out.push({v: src.slice(i, j), id: true}); i = j; continue; }
+    if (/[0-9]/.test(c)){ let j = i; while (j < src.length && /[0-9.]/.test(src[j])) j++; out.push({v: src.slice(i, j), num: true}); i = j; continue; }
+    const two = src.slice(i, i + 2);
+    if (OPS.includes(two)){ out.push({v: two}); i += 2; continue; }
+    out.push({v: c}); i++;
+  }
+  return out;
+}
+const tv = ts => ts.map(t => t.v);
+const same = (a, b) => a.length === b.length && a.every((x, i) => x === b[i]);
+/* ============================================================ checker */
+function stripBraces(raw){
+  let s = raw.trim(), braces = false;
+  if (/^\}/.test(s)){ s = s.replace(/^\}\s*/, ""); braces = true; }
+  if (/\{\s*$/.test(s)){ s = s.replace(/\s*\{\s*$/, ""); braces = true; }
+  return {s, braces};
+}
+/* the accepted version a correct answer matches, so the program shows it neatly spaced */
+function matched(line, raw){
+  const V = tv(tokens(stripBraces(raw).s));
+  return [line.code, ...(line.alt || [])].find(c => same(V, tv(tokens(c)))) || line.code;
+}
+function count(ts, ch){ return ts.filter(t => t.v === ch).length; }
+
+function check(line, raw){
+  const {s, braces} = stripBraces(raw);
+  const tip = braces ? " (No need to type { or } for a block: they are added for you.)" : "";
+  if (!s) return {ok:false, msg: braces ? "Leave the curly brackets out: type just the line of code." : "Type the line of code into the box first."};
+  const T = tokens(s), V = tv(T);
+  const targets = [line.code, ...(line.alt || [])].map(c => tv(tokens(c)));
+  if (targets.some(t => same(V, t))) return {ok:true, msg: "✓ Correct." + tip};
+  const E = targets[0], ET = tokens(line.code);
+
+  // 1. capital letters
+  const lowerHit = targets.find(t => same(V.map(x => x.toLowerCase()), t.map(x => x.toLowerCase())));
+  if (lowerHit){
+    const i = V.findIndex((x, k) => x !== lowerHit[k]);
+    return {ok:false, msg:`C# is case-sensitive. Write <code>${esc(lowerHit[i])}</code>, not <code>${esc(V[i])}</code>.` + tip};
+  }
+  // 2. line-specific mistakes the class often makes
+  for (const [re, m] of (line.checks || [])) if (re.test(s)) return {ok:false, msg: m + tip};
+  // 3. unclosed text
+  const bad = T.find(t => t.str && !t.closed);
+  if (bad) return {ok:false, msg:`Your text is missing its closing quote mark <code>"</code>.` + tip};
+  // 4. brackets that do not pair up
+  for (const [o, c, name] of [["(", ")", "round brackets ( )"], ["[", "]", "square brackets [ ]"]]){
+    if (count(T, o) !== count(T, c)) return {ok:false, msg:`Your ${name} do not pair up: you have ${count(T, o)} <code>${o}</code> and ${count(T, c)} <code>${c}</code>.` + tip};
+  }
+  // 5. semicolons
+  const wantSemi = E[E.length - 1] === ";", hasSemi = V[V.length - 1] === ";";
+  if (wantSemi && !hasSemi && same([...V, ";"], E)) return {ok:false, msg:"Nearly. This line needs a semicolon <code>;</code> at the end." + tip};
+  if (wantSemi && !hasSemi) { /* keep looking for a more useful message, then remind */ }
+  if (!wantSemi && hasSemi) return {ok:false, msg:`Do not put <code>;</code> at the end of this line. A <code>;</code> after ${esc(E[0])} ends it before its block starts.` + tip};
+  // 6. = instead of ==
+  if (E.includes("==") && !V.includes("==") && V.includes("=")) return {ok:false, msg:"To compare two values use <code>==</code>. A single <code>=</code> stores a value." + tip};
+  // 7. wrong text in quotes
+  const es = ET.filter(t => t.str).map(t => t.v), ss = T.filter(t => t.str).map(t => t.v);
+  if (es.length && ss.length && es.join() !== ss.join()) return {ok:false, msg:`The text in quotes must be exactly <code>${esc(es.join(" and "))}</code>: check spelling, capitals and spaces.` + tip};
+  // 8. text without quote marks
+  const qi = ET.findIndex(t => t.str);
+  if (qi >= 0 && !T.some(t => t.str) && V.some(v => ET[qi].v.slice(1, -1).split(" ")[0] === v)) return {ok:false, msg:`Text that is printed must go inside quote marks: <code>${esc(ET[qi].v)}</code>.` + tip};
+  // 9. first difference
+  const best = targets.reduce((b, t) => { const k = firstDiff(V, t); return k > b.k ? {k, t} : b; }, {k:-1, t:E});
+  const i = best.k, want = best.t;
+  if (i >= V.length) return {ok:false, msg: wantSemi && !hasSemi && V.length === want.length - 1 ? "Nearly. This line needs a semicolon <code>;</code> at the end." + tip : `Your line stops too early. Next it needs <code>${esc(want[i])}</code>.` + tip};
+  if (i >= want.length) return {ok:false, msg:`There is something extra at the end: <code>${esc(V.slice(i).join(" "))}</code>. Take it out.` + tip};
+  const after = i ? ` after <code>${esc(want.slice(Math.max(0, i - 2), i).join(" "))}</code>` : " at the start";
+  if (/^[A-Za-z_]/.test(want[i]) && /^[A-Za-z_]/.test(V[i])) return {ok:false, msg:`Check the word${after}: the instruction needs <code>${esc(want[i])}</code>, you wrote <code>${esc(V[i])}</code>.` + tip};
+  if (want.slice(i + 1).length && same(V.slice(i), want.slice(i + 1))) return {ok:false, msg:`Something is missing${after}: add <code>${esc(want[i])}</code>.` + tip};
+  return {ok:false, msg:`Look${after}: it should be <code>${esc(want[i])}</code>, you have <code>${esc(V[i])}</code>.` + tip};
+}
+function firstDiff(a, b){ let i = 0; while (i < a.length && i < b.length && a[i] === b[i]) i++; return i; }
+
+/* ============================================================ task data
+   kind: given (shown, not typed) · note (ERL line that becomes a brace) · line (student types it)
+   d = indent depth: 0 class level, 1 inside class, 2 inside Main/function, … braces come from depth changes
+   seg = which part of the algorithm the line belongs to (same colours as the lesson slides) */
+const SEGS = {
+  data:  ["Sorted data", "#5A6470"],
+  bounds:["Set the bounds", "#2F6FD6"],
+  loop:  ["Keep going while the range isn't empty", "#7B4FD6"],
+  mid:   ["Find the midpoint", "#B07D12"],
+  found: ["Found it?", "#1F7A4D"],
+  left:  ["Discard the left half", "#C25A0E"],
+  right: ["Discard the right half", "#B3261E"],
+  none:  ["Not found", "#555D68"],
+  report:["Report the result", "#163351"]
+};
+const COMMON = {
+  readInt: name => [[new RegExp(`^int\\s+${name}\\s*=\\s*Console\\.ReadLine`, "i"), "<code>Console.ReadLine()</code> gives you text (a string). Wrap it in <code>int.Parse( )</code> to turn it into an int."],
+                    [new RegExp(`^${name}\\s*=`), `This is a new variable, so start with its type: <code>int ${name} = …</code>`],
+                    [/int\.Parse\s*\(\s*Console\.ReadLine\s*\(\s*\)\s*;?$/, "Close <code>int.Parse(</code> as well: the line ends <code>ReadLine());</code>"]],
+  print: [[/^print\s*\(/i, "<code>print</code> is ERL (and Python). In C# use <code>Console.WriteLine( … );</code>"], [/Console\.Write\s*\(/, "Use <code>Console.WriteLine</code> so the output ends with a new line."]],
+  high: [[/items\.Length\s*\(/, "<code>Length</code> has no brackets in C#: <code>items.Length</code>."],
+         [/=\s*items\.Length\s*;/, "The last index is one less than the length (indexes start at 0): <code>items.Length - 1</code>."],
+         [/=\s*\d+\s*;/, "Use <code>items.Length - 1</code> rather than a number, so it works for a list of any size."],
+         [/^high\s*=/, "<code>high</code> is a new variable, so it needs its type: <code>int high = …</code>"],
+         [/length/, "C# is case-sensitive: <code>Length</code> has a capital L."]],
+  low: [[/^low\s*=\s*0/, "<code>low</code> is a new variable, so it needs its type: <code>int low = 0;</code>"],
+        [/=\s*1\s*;/, "Indexes start at 0, so the first possible position is <code>0</code>."]],
+  mid: [[/DIV/i, "<code>DIV</code> is ERL. In C#, <code>/</code> between two <code>int</code>s already throws away the remainder, so use <code>/ 2</code>."],
+        [/=\s*low\s*\+\s*high\s*\/\s*2/, "Without brackets C# divides <code>high</code> by 2 first. Put brackets round <code>(low + high)</code>."],
+        [/Math\./, "No <code>Math</code> needed: <code>int</code> division rounds down for you."],
+        [/^mid\s*=/, "Make <code>mid</code> a new <code>int</code> here: <code>int mid = …</code> (it is worked out fresh on every pass)."],
+        [/items\s*\[/, "<code>mid</code> is an <b>index</b> (a position), not a value. Work it out from <code>low</code> and <code>high</code> only."]],
+  foundIf: [[/items\s*\[\s*mid\s*\]\s*=\s*[^=]/, "To compare use <code>==</code>. A single <code>=</code> would store target into the list!"],
+            [/^if\s*\(\s*mid\s*==/, "<code>mid</code> is a position. Compare the <b>value</b> at that position: <code>items[mid]</code>."],
+            [/then/, "<code>then</code> is ERL. In C# the condition just goes in round brackets."],
+            [/^if\s+[^(]/, "The condition goes in round brackets: <code>if ( … )</code>"]],
+  elseIf: [[/^elseif/, "In C# it is two words: <code>else if</code>."],
+           [/^if\s*\(/, "This belongs to the same decision as the line above, so it starts <code>else if</code>."],
+           [/>\s*target/, "Here we test if the middle value is <b>smaller</b> than the target: <code>items[mid] &lt; target</code>. (Then the target must be to the right.)"],
+           [/^else\s+if\s*\(\s*mid\s*</, "Compare the <b>value</b> <code>items[mid]</code>, not the position <code>mid</code>."],
+           [/then/, "<code>then</code> is ERL. In C# the condition just goes in round brackets."]],
+  lowMove: [[/^low\s*=\s*mid\s*;/, "If <code>low = mid</code>, the midpoint stays in the range and the loop can get stuck forever. We have already checked <code>mid</code>, so skip past it: <code>mid + 1</code>."],
+            [/^int\s+low/, "<code>low</code> already exists. Don't write <code>int</code> again, just give it a new value."],
+            [/mid\s*-\s*1/, "The target is bigger than the middle value, so it is to the <b>right</b>: move <code>low</code> up to <code>mid + 1</code>."],
+            [/^high\s*=/, "On this branch the target is to the right, so it is <code>low</code> that moves."]],
+  highMove: [[/^high\s*=\s*mid\s*;/, "If <code>high = mid</code>, the midpoint stays in the range and the loop can get stuck forever. Skip past it: <code>mid - 1</code>."],
+             [/^int\s+high/, "<code>high</code> already exists. Don't write <code>int</code> again, just give it a new value."],
+             [/mid\s*\+\s*1/, "The target is smaller than the middle value, so it is to the <b>left</b>: move <code>high</code> down to <code>mid - 1</code>."],
+             [/^low\s*=/, "On this branch the target is to the left, so it is <code>high</code> that moves."]],
+  whileChecks: [[/low\s*<\s*high/, "With <code>&lt;</code> the loop stops when <code>low</code> and <code>high</code> meet, so a range of one item is never checked. Use <code>&lt;=</code>."],
+                [/=<|=>/, "Write the symbol as <code>&lt;=</code> (less-than first, then equals)."],
+                [/^while\s+[^(]/, "The condition goes in round brackets: <code>while ( … )</code>"],
+                [/\band\b/, "<code>and</code> is ERL. In C# write <code>&amp;&amp;</code>."],
+                [/endwhile|do$/, "No <code>do</code> or <code>endwhile</code> in C#: the brackets mark the block."]]
+};
+const SEARCHLIST = [3, 8, 12, 19, 25, 31, 40, 47, 56];
+function bsearch(a, t){ let lo = 0, hi = a.length - 1; while (lo <= hi){ const m = Math.floor((lo + hi) / 2); if (a[m] === t) return m; if (a[m] < t) lo = m + 1; else hi = m - 1; } return -1; }
+
+const TASKS = [
+ { n:1, id:"t21", base:2, title:"2.1 Binary Search Step by Step", pills:[["MUST",""],["★★",""],["MODELLED","model"]],
+   howto:"Build binary search inside <code>Main</code>, one line at a time. Each line is tagged with the <b>part of the algorithm</b> it belongs to: the same colours as on the board. The program reads a target and prints <code>Found at index n</code> or <code>Not found</code>.",
+   rows:[
+    {k:"given", d:0, code:"using System;"},
+    {k:"blank"},
+    {k:"given", d:0, code:"class Program"},
+    {k:"given", d:1, code:"static void Main()"},
+    {k:"given", d:2, code:"int[] items = {3, 8, 12, 19, 25, 31, 40, 47, 56};", label:"sorted · Lesson 1's list, now in order"},
+    {k:"line", d:2, seg:"data", code:"int target = int.Parse(Console.ReadLine());",
+      task:"Read a whole number typed on the keyboard and store it in an <code>int</code> variable called <code>target</code>.",
+      hint:"Same as Lesson 1: <code>int.Parse(Console.ReadLine())</code>", checks:COMMON.readInt("target")},
+    {k:"line", d:2, seg:"bounds", code:"int low = 0;",
+      task:"Create an <code>int</code> called <code>low</code> holding the <b>first</b> index of the search range.",
+      hint:"The first index of any array is 0.", checks:COMMON.low},
+    {k:"line", d:2, seg:"bounds", code:"int high = items.Length - 1;",
+      task:"Create an <code>int</code> called <code>high</code> holding the <b>last</b> index of the list.",
+      hint:"9 items → last index 8. Work it out from <code>items.Length</code>.", checks:COMMON.high},
+    {k:"line", d:2, seg:"report", code:"int pos = -1;",
+      task:"Create an <code>int</code> called <code>pos</code> and set it to <code>-1</code> (nothing found yet).",
+      hint:"Same idea as <code>return -1</code> in Lesson 1: -1 means \"not found\".",
+      checks:[[/^pos\s*=/, "<code>pos</code> is new, so it needs its type: <code>int pos = -1;</code>"], [/bool/, "Store a <b>position</b> here, not true/false: <code>int pos = -1;</code>"]]},
+    {k:"line", d:2, seg:"loop", code:"while (low <= high && pos == -1)", alt:["while (pos == -1 && low <= high)", "while ((low <= high) && (pos == -1))", "while (high >= low && pos == -1)"],
+      task:"Start a <code>while</code> loop that keeps going while <code>low &lt;= high</code> <b>and</b> <code>pos == -1</code> (the range isn't empty and we haven't found it yet).",
+      hint:"Join two conditions with <code>&amp;&amp;</code>: <code>while (A &amp;&amp; B)</code>",
+      checks:[...COMMON.whileChecks, [/^while\s*\(\s*low\s*<=\s*high\s*\)$/, "Nearly. Also stop once it is found: add <code>&amp;&amp; pos == -1</code>."]]},
+    {k:"line", d:3, seg:"mid", code:"int mid = (low + high) / 2;",
+      task:"Inside the loop: create an <code>int</code> called <code>mid</code>, the index halfway between <code>low</code> and <code>high</code>.",
+      hint:"Add the two bounds, then divide by 2. Brackets matter!", checks:COMMON.mid},
+    {k:"line", d:3, seg:"found", code:"if (items[mid] == target)",
+      task:"<b>If</b> the value at index <code>mid</code> equals <code>target</code>…",
+      hint:"The value at an index: <code>items[mid]</code>", checks:COMMON.foundIf},
+    {k:"line", d:4, seg:"found", code:"pos = mid;",
+      task:"…store <code>mid</code> in <code>pos</code>. (That ends the loop next time it checks.)",
+      checks:[[/^int\s+pos/, "<code>pos</code> already exists. Don't write <code>int</code> again."], [/return/, "We're inside <code>Main</code>, not a function, so store the answer in <code>pos</code> instead of returning it."], [/^mid\s*=\s*pos/, "The other way round: <code>pos</code> gets the value of <code>mid</code>: <code>pos = mid;</code>"]]},
+    {k:"line", d:3, seg:"left", code:"else if (items[mid] < target)",
+      task:"<b>Otherwise, if</b> the value at <code>mid</code> is <b>less than</b> the target (so the target must be to the right)…",
+      hint:"Starts <code>else if</code>, then the condition in brackets.", checks:COMMON.elseIf},
+    {k:"line", d:4, seg:"left", code:"low = mid + 1;",
+      task:"…throw away the left half: move <code>low</code> to just <b>after</b> <code>mid</code>.", checks:COMMON.lowMove},
+    {k:"line", d:3, seg:"right", code:"else",
+      task:"<b>Otherwise</b> (the value at <code>mid</code> is bigger, so the target must be to the left)…",
+      checks:[[/else\s*if/, "Just <code>else</code> on its own: it's the only case left."]]},
+    {k:"line", d:4, seg:"right", code:"high = mid - 1;",
+      task:"…throw away the right half: move <code>high</code> to just <b>before</b> <code>mid</code>.", checks:COMMON.highMove},
+    {k:"line", d:2, seg:"none", code:"if (pos == -1)",
+      task:"After the loop: <b>if</b> <code>pos</code> is still <code>-1</code>…", hint:"Still -1 means the range ran out (low passed high) without a match."},
+    {k:"line", d:3, seg:"none", code:"Console.WriteLine(\"Not found\");", task:"…print <code>Not found</code>.", checks:COMMON.print},
+    {k:"line", d:2, seg:"report", code:"else", task:"<b>Otherwise</b>…", checks:[[/else\s*if/, "Just <code>else</code> on its own here."]]},
+    {k:"line", d:3, seg:"report", code:"Console.WriteLine(\"Found at index \" + pos);",
+      task:"…print <code>Found at index </code> followed by <code>pos</code>. Note the space before the closing quote.",
+      hint:"Join text and a number with <code>+</code>.",
+      checks:[[/"Found at index"\s*\+/, "Add a space before the closing quote: <code>\"Found at index \"</code>."], ...COMMON.print]}
+   ],
+   run(inputs){ const t = parseInt(inputs[0]); if (isNaN(t)) return "Error: int.Parse needs a whole number"; const i = bsearch(SEARCHLIST, t); return i === -1 ? "Not found" : "Found at index " + i; },
+   sample:"40",
+   trace:{data:"items = {3, 8, 12, 19, 25, 31, 40, 47, 56}   ·   input: 40",
+     note:"One row per pass of the while loop: low and high at the START of the pass, then mid, items[mid], and pos at the END of the pass.",
+     cols:["low","high","mid","items[mid]","pos"],
+     rows:[["0","8","4","25","-1"],["5","8","6","40","6"]],
+     output:"Found at index 6"}
+ },
+
+ { n:2, id:"t22", base:1, title:"2.2 Binary Search Function", pills:[["MUST",""],["★★",""]],
+   howto:"Now turn it into a function, straight from the OCR Exam Reference Language. A function can <code>return</code> as soon as it finds the target, so it doesn't need <code>pos</code> inside. <code>Main</code> is the one you built in 1.3, so most of it is given.",
+   rows:[
+    {k:"given", d:0, code:"using System;"},
+    {k:"blank"},
+    {k:"given", d:0, code:"class Program"},
+    {k:"line", d:1, code:"static int BinarySearch(int[] items, int target)", erl:"function binarySearch(items, target)",
+      task:"Write the function header: <code>static</code>, returns an <code>int</code>, named <code>BinarySearch</code> (capital B and S), parameters <code>int[] items</code> and <code>int target</code>.",
+      hint:"Same shape as <code>LinearSearch</code> in 1.2.",
+      checks:[[/^function/, "<code>function</code> is ERL. A C# function header starts <code>static int</code>."], [/static\s+void/, "<code>void</code> means nothing comes back. This function returns a position, so its return type is <code>int</code>."], [/\(\s*items\s*,/, "Each parameter needs a type: <code>int[] items</code>, <code>int target</code>."]]},
+    {k:"line", d:2, seg:"bounds", code:"int low = 0;", erl:"low = 0", task:"Set the lower bound.", checks:COMMON.low},
+    {k:"line", d:2, seg:"bounds", code:"int high = items.Length - 1;", erl:"high = items.length - 1", task:"Set the upper bound.", hint:"ERL <code>length</code> → C# <code>Length</code>", checks:COMMON.high},
+    {k:"line", d:2, seg:"loop", code:"while (low <= high)", alt:["while (high >= low)"], erl:"while low <= high",
+      task:"Loop while the range is not empty.", hint:"Condition in round brackets.", checks:COMMON.whileChecks},
+    {k:"line", d:3, seg:"mid", code:"int mid = (low + high) / 2;", erl:"mid = (low + high) DIV 2", task:"Find the midpoint.", checks:COMMON.mid},
+    {k:"line", d:3, seg:"found", code:"if (items[mid] == target)", erl:"if items[mid] == target then", task:"Is the middle value the target?", checks:COMMON.foundIf},
+    {k:"line", d:4, seg:"found", code:"return mid;", erl:"return mid", task:"Send back its index. The function stops here.",
+      checks:[[/return\s+items\s*\[/, "Return the <b>index</b> <code>mid</code>, not the value stored there."], [/return\s+true/, "This function returns an <code>int</code> position: <code>return mid;</code>"]]},
+    {k:"line", d:3, seg:"left", code:"else if (items[mid] < target)", erl:"elseif items[mid] < target then", task:"Is the middle value smaller than the target?", checks:COMMON.elseIf},
+    {k:"line", d:4, seg:"left", code:"low = mid + 1;", erl:"low = mid + 1", task:"Discard the left half.", checks:COMMON.lowMove},
+    {k:"line", d:3, seg:"right", code:"else", erl:"else", task:"Otherwise…", checks:[[/else\s*if/, "Just <code>else</code> on its own here."]]},
+    {k:"line", d:4, seg:"right", code:"high = mid - 1;", erl:"high = mid - 1", task:"Discard the right half.", checks:COMMON.highMove},
+    {k:"note", d:3, erl:"endif", text:"becomes a closing bracket <b>}</b> — added for you"},
+    {k:"note", d:2, erl:"endwhile", text:"becomes a closing bracket <b>}</b> — added for you"},
+    {k:"line", d:2, seg:"none", code:"return -1;", erl:"return -1", task:"The loop ended without a match (low passed high): send back <code>-1</code>.",
+      checks:[[/return\s+false/, "This function returns an <code>int</code>, so send back <code>-1</code> to mean not found."]]},
+    {k:"note", d:1, erl:"endfunction", text:"becomes a closing bracket <b>}</b> — added for you"},
+    {k:"blank"},
+    {k:"given", d:1, code:"static void Main()", label:"from 1.3"},
+    {k:"given", d:2, code:"string[] parts = Console.ReadLine().Split(' ');"},
+    {k:"given", d:2, code:"int[] items = new int[parts.Length];"},
+    {k:"given", d:2, code:"for (int i = 0; i < parts.Length; i++)"},
+    {k:"given", d:3, code:"items[i] = int.Parse(parts[i]);"},
+    {k:"given", d:2, code:"int target = int.Parse(Console.ReadLine());"},
+    {k:"line", d:2, seg:"report", code:"int pos = BinarySearch(items, target);",
+      task:"Call <code>BinarySearch</code> with <code>items</code> and <code>target</code>, and store what it returns in an <code>int</code> called <code>pos</code>.",
+      hint:"Catch the returned value: <code>int pos = BinarySearch( … );</code>",
+      checks:[[/^BinarySearch\s*\(/, "The value that comes back would be lost. Store it: <code>int pos = BinarySearch( … );</code>"], [/\(\s*target\s*,\s*items\s*\)/, "Arguments go in the same order as the parameters: <code>items</code> first, then <code>target</code>."], [/LinearSearch/, "Today it's <code>BinarySearch</code>!"]]},
+    {k:"given", d:2, code:"if (pos == -1)"},
+    {k:"given", d:3, code:"Console.WriteLine(\"Not found\");"},
+    {k:"given", d:2, code:"else"},
+    {k:"given", d:3, code:"Console.WriteLine(\"Found at index \" + pos);"}
+   ],
+   run(inputs){
+     const parts = (inputs[0] || "").trim().split(/\s+/), t = parseInt(inputs[1]);
+     if (parts.some(p => isNaN(parseInt(p))) || isNaN(t)) return "Error: int.Parse needs whole numbers";
+     const a = parts.map(Number);
+     const sorted = a.every((v, i) => i === 0 || a[i - 1] <= v);
+     const i = bsearch(a, t), out = i === -1 ? "Not found" : "Found at index " + i;
+     return sorted ? out : out + "\n\n(Careful: that list isn't sorted, so this answer can't be trusted!)";
+   },
+   sample:"3 8 12 19 25 31 40 47 56\n10",
+   trace:{data:"input line 1: 3 8 12 19 25 31 40 47 56   ·   input line 2: 10",
+     note:"Trace BinarySearch(items, 10). One row per check of the while condition: low and high, then (if the loop runs) mid and items[mid]. In the last row the loop does not run: leave mid and items[mid] blank and fill in return.",
+     cols:["low","high","mid","items[mid]","return"],
+     rows:[["0","8","4","25",""],["0","3","1","8",""],["2","3","2","12",""],["2","1","","","-1"]],
+     extra:[["pos","-1"]],
+     output:"Not found"}
+ }
+];
+
+/* ============================================================ build page */
+const app = $("#app");
+TASKS.forEach(T => {
+  T.lines = T.rows.filter(r => r.k === "line");
+  T.lines.forEach((r, i) => { r.key = `${T.id}-${i}`; r.no = i + 1; });
+  const sec = document.createElement("section");
+  sec.className = "act"; sec.id = T.id; sec.dataset.n = T.n;
+  sec.innerHTML = `<header><span class="num">${T.n}</span><h2>${esc(T.title)}</h2>${T.pills.map(([p, c]) => `<span class="pill ${c}">${p}</span>`).join("")}<span class="badge" id="badge-${T.id}"></span></header>
+    <div class="lockpanel"><p>🔒 Locked. Finish Task ${T.n - 1}, then type the code your teacher shows you.</p><input type="text" maxlength="12" placeholder="CODE" autocomplete="off" aria-label="Unlock code for task ${T.title}" id="code-${T.id}"><button class="btn" type="button">Unlock</button><span class="lockmsg"></span></div>
+    <div class="secbody">
+      <p class="howto">${T.howto}</p>
+      <div class="rules"><span>Type one line per box</span><span>Press Enter to check</span><span>No { } for blocks</span><span>Capital letters matter</span></div>
+      <div class="rows"></div>
+      <div class="prog">
+        <div class="proghead"><h3>Your whole program</h3><div class="legend"><span><i style="color:var(--gold5)">{ }</i> added for you</span><span><i style="color:var(--muted)">//</i> still to write</span></div></div>
+        <div class="code" id="code-${T.id}-view" aria-live="polite"></div>
+        <div class="donebar" id="done-${T.id}"><p><strong>Program complete.</strong> Copy it into CodeBash task ${esc(T.title)}, press Run Tests, then Submit.</p><button class="btn gold" type="button" data-copy="${T.id}">Copy code</button><div class="unlockcode">Code to unlock Task ${NEXTLABEL[T.n]}: <b>${NEXTCODE[T.n]}</b>${T.n === 2 ? " · Task 2.4 (homework) is now open too." : ""}</div></div>
+        <div class="tryit" id="try-${T.id}"><h3>Try it here first</h3><div class="tryrow"><textarea id="try-in-${T.id}" aria-label="Input for ${esc(T.title)}">${esc(T.sample)}</textarea><button class="btn ghost" type="button" data-run="${T.id}">▶ Run</button><div class="console" id="out-${T.id}" aria-live="polite"></div></div></div>
+        ${traceHtml(T)}
+      </div>
+    </div>`;
+  app.appendChild(sec);
+  const box = $(".rows", sec);
+  T.rows.forEach(r => {
+    if (r.k === "blank") return;
+    const div = document.createElement("div");
+    const pad = "··".repeat(Math.max(0, r.d - T.base));
+    if (r.k === "given"){
+      div.className = "row given";
+      div.innerHTML = `<span class="ln" aria-hidden="true">✓</span><div class="main"><span class="givenlabel">Given${r.label ? " · " + esc(r.label) : ""}</span><div class="givencode">${esc(r.code)}</div></div>`;
+    } else if (r.k === "note"){
+      div.className = "row note";
+      div.innerHTML = `<span class="ln" aria-hidden="true">↳</span><div class="main"><div class="erl"><b>ERL</b>${esc(r.erl)}</div><span class="fb tip">${r.text}</span></div>`;
+    } else {
+      div.className = "row"; div.id = "row-" + r.key;
+      div.innerHTML = `<span class="ln">${r.no}</span><div class="main">
+        ${r.seg ? `<span class="seg" style="background:${SEGS[r.seg][1]}">${SEGS[r.seg][0]}</span>` : ""}
+        <div class="task">${r.task}</div>
+        ${r.erl ? `<div class="erl"><b>ERL</b>${esc(r.erl)}</div>` : ""}
+        <div class="entry"><span class="indent" aria-hidden="true">${pad}</span><input type="text" id="in-${r.key}" spellcheck="false" autocapitalize="off" autocomplete="off" autocorrect="off" aria-label="Line ${r.no}" placeholder="type line ${r.no} here">
+        <button class="btn" type="button" data-check="${r.key}">Check</button>
+        <button class="btn ghost" type="button" data-hint="${r.key}" ${r.hint ? "" : "hidden"}>Hint</button>
+        <button class="btn model" type="button" data-model="${r.key}">▶ Model</button></div>
+        <div class="hintbox" id="hint-${r.key}" hidden>${r.hint || ""}</div>
+        <div class="fb" id="fb-${r.key}" aria-live="polite"></div></div>`;
+    }
+    box.appendChild(div);
+  });
+
+  // lock panel
+  if (T.n > 1){
+    const p = $(".lockpanel", sec), inp = $("input", p), msg = $(".lockmsg", p);
+    const go = () => {
+      const prev = TASKS[T.n - 2];
+      if (!taskDone(prev)){ msg.textContent = `Finish Task ${prev.title.split(" ")[0]} first.`; return; }
+      if (lhashRaw(inp.value.trim().toUpperCase()) === LOCKS[T.n]){ if (!S.unlocked.includes(String(T.n))) S.unlocked.push(String(T.n)); save(); renderAll(); sec.scrollIntoView({behavior:"smooth", block:"start"}); }
+      else msg.textContent = "That code isn't right. Check the board.";
+    };
+    $("button", p).addEventListener("click", go);
+    inp.addEventListener("keydown", e => { if (e.key === "Enter") go(); });
+  }
+});
+
+/* ============================================================ state + render */
+const findLine = key => { for (const T of TASKS) for (const r of T.lines) if (r.key === key) return [T, r]; };
+const isRight = r => S.ans[r.key] && check(r, S.ans[r.key]).ok;
+const taskDone = T => T.lines.every(isRight);
+const isOpen = T => TEACHER || S.unlocked.includes(String(T.n));
+
+function renderTask(T){
+  const sec = $("#" + T.id), open = isOpen(T);
+  sec.classList.toggle("locked", !open);
+  let firstOpen = -1;
+  T.lines.forEach((r, i) => {
+    const row = $("#row-" + r.key), inp = $("#in-" + r.key), ok = isRight(r);
+    if (document.activeElement !== inp) inp.value = S.ans[r.key] || "";
+    const reachable = i === 0 || isRight(T.lines[i - 1]) || ok;
+    if (!ok && firstOpen < 0 && reachable) firstOpen = i;
+    row.classList.toggle("waiting", !reachable);
+    inp.disabled = !reachable;
+    $(`[data-check="${r.key}"]`).disabled = !reachable;
+    row.classList.toggle("right", ok);
+    if (ok) row.classList.remove("wrong");
+  });
+  const done = taskDone(T);
+  const b = $("#badge-" + T.id), got = T.lines.filter(isRight).length;
+  b.textContent = !open ? "🔒 Locked" : done ? "✓ Complete" : `${got} of ${T.lines.length} lines`;
+  b.className = "badge" + (done ? " done" : "");
+  $("#done-" + T.id).classList.toggle("on", done);
+  $("#try-" + T.id).classList.toggle("on", done);
+  renderCode(T, firstOpen);
+}
+function renderAll(){ TASKS.forEach(T => { renderTask(T); renderTrace(T); }); if (document.getElementById("t23")) renderBriefs(); }
+
+/* assemble the full program, adding braces from the depth changes */
+function assemble(T, cur){
+  const out = []; const stack = [];
+  const items = T.rows.filter(r => r.k !== "note");
+  const pad = d => "    ".repeat(d);
+  const closeTo = d => { while (stack.length && stack[stack.length - 1] >= d){ const x = stack.pop(); out.push({txt: pad(x) + "}", brace: true}); } };
+  items.forEach((r, i) => {
+    if (r.k === "blank"){
+      const next = items.slice(i + 1).find(x => x.k !== "blank");
+      if (next) closeTo(next.d);
+      out.push({txt: ""}); return;
+    }
+    closeTo(r.d);
+    let line;
+    if (r.k === "given") line = {txt: pad(r.d) + r.code, given: true};
+    else if (isRight(r)) line = {txt: pad(r.d) + matched(r, S.ans[r.key]), mine: true};
+    else line = {txt: pad(r.d) + `// line ${r.no}: ${plain(r.task)}`, ph: true, cur: T.lines.indexOf(r) === cur};
+    out.push(line);
+    const next = items.slice(i + 1).find(x => x.k !== "blank");
+    if (next && next.d > r.d){ out.push({txt: pad(r.d) + "{", brace: true}); stack.push(r.d); }
+  });
+  closeTo(0);
+  return out;
+}
+const plain = h => { const d = document.createElement("div"); d.innerHTML = h; let t = d.textContent.replace(/\s+/g, " ").trim(); return t.length > 70 ? t.slice(0, 67) + "…" : t; };
+function hl(src){
+  return tokensWithSpace(src).map(([t, kind]) => kind ? `<span class="${kind}">${esc(t)}</span>` : esc(t)).join("");
+}
+const KW = new Set("using class static void int bool string double for if else return new true false while".split(" "));
+function tokensWithSpace(src){
+  const out = []; const re = /("(?:[^"\\]|\\.)*"?|'(?:[^'\\]|\\.)*'?)|([A-Za-z_][A-Za-z0-9_]*)|(\d+(?:\.\d+)?)|(\s+)|(.)/g; let m;
+  while ((m = re.exec(src))){
+    if (m[1]) out.push([m[1], "s"]);
+    else if (m[2]){ const w = m[2], after = src.slice(re.lastIndex).trimStart();
+      out.push([w, KW.has(w) ? "k" : (w === "Console" || w === "System" || w === "Program") ? "t" : after[0] === "(" ? "f" : ""]); }
+    else if (m[3]) out.push([m[3], "n"]);
+    else out.push([m[0], ""]);
+  }
+  return out;
+}
+function renderCode(T, cur){
+  const lines = assemble(T, cur);
+  $(`#code-${T.id}-view`).innerHTML = lines.map((l, i) =>
+    `<div class="cl${l.cur ? " cur" : ""}"><span class="g">${i + 1}</span><span class="src">${l.brace ? `<span class="br">${esc(l.txt)}</span>` : l.ph ? `<span class="ph">${esc(l.txt)}</span>` : hl(l.txt)}</span></div>`).join("");
+}
+function codeText(T){ return assemble(T, -1).map(l => l.txt).join("\n") + "\n"; }
+
+/* ============================================================ interaction */
+function doCheck(key, moveOn){
+  const [T, r] = findLine(key), inp = $("#in-" + key), fb = $("#fb-" + key), row = $("#row-" + key);
+  S.ans[key] = inp.value; save();
+  const res = check(r, inp.value);
+  fb.innerHTML = res.msg; fb.className = "fb " + (res.ok ? "good" : "bad");
+  row.classList.toggle("wrong", !res.ok); row.classList.toggle("right", res.ok);
+  if (!res.ok){ S.tries[key] = (S.tries[key] || 0) + 1; save(); if (S.tries[key] >= 3 && r.hint) $("#hint-" + key).hidden = false; }
+  renderTask(T);
+  if (res.ok && moveOn){
+    const nx = T.lines[T.lines.indexOf(r) + 1];
+    if (nx && !isRight(nx)) setTimeout(() => $("#in-" + nx.key).focus(), 60);
+  }
+}
+document.addEventListener("click", e => {
+  const c = e.target.closest("[data-check]"); if (c) doCheck(c.dataset.check, true);
+  const h = e.target.closest("[data-hint]"); if (h){ const b = $("#hint-" + h.dataset.hint); b.hidden = !b.hidden; }
+  const m = e.target.closest("[data-model]"); if (m) model(m.dataset.model);
+  const cp = e.target.closest("[data-copy]"); if (cp) copyCode(cp);
+  const rn = e.target.closest("[data-run]"); if (rn){ const T = TASKS.find(t => t.id === rn.dataset.run); $("#out-" + T.id).textContent = T.run($("#try-in-" + T.id).value.split("\n")); }
+});
+document.addEventListener("keydown", e => {
+  if (e.key === "Enter" && e.target.id && e.target.id.startsWith("in-t") && e.target.tagName === "INPUT"){ e.preventDefault(); doCheck(e.target.id.slice(3), true); }
+});
+document.addEventListener("input", e => {
+  if (e.target.tagName === "INPUT" && e.target.id.startsWith("in-t")){
+    const key = e.target.id.slice(3), [T] = findLine(key);
+    if (isRight(findLine(key)[1]) && !check(findLine(key)[1], e.target.value).ok){ S.ans[key] = e.target.value; save(); $("#fb-" + key).textContent = ""; renderTask(T); }
+  }
+});
+/* teacher: type the model answer live, one character at a time */
+function model(key){
+  const [, r] = findLine(key), inp = $("#in-" + key);
+  if (inp.disabled) return;
+  const full = r.code; let i = 0; inp.value = ""; inp.focus();
+  const reduce = matchMedia("(prefers-reduced-motion: reduce)").matches;
+  const step = () => { i += reduce ? full.length : 1; inp.value = full.slice(0, i); if (i < full.length) setTimeout(step, 45); else doCheck(key, true); };
+  step();
+}
+async function copyCode(btn){
+  const T = TASKS.find(t => t.id === btn.dataset.copy), txt = codeText(T);
+  try { await navigator.clipboard.writeText(txt); btn.textContent = "Copied ✓"; }
+  catch (e) {
+    const r = document.createRange(); r.selectNodeContents($(`#code-${T.id}-view`)); const s = getSelection(); s.removeAllRanges(); s.addRange(r);
+    btn.textContent = "Selected: press Ctrl+C";
+  }
+  setTimeout(() => btn.textContent = "Copy code", 2500);
+}
+/* ============================================================ optional trace tables */
+function traceHtml(T){
+  const tr = T.trace; if (!tr) return "";
+  const cell = (id, label) => `<input type="text" id="${id}" data-tr="${T.id}" spellcheck="false" autocomplete="off" aria-label="${esc(label)}">`;
+  let h = `<details class="trace" id="trace-${T.id}"><summary>Trace it with a small list <span class="pill navy">OPTIONAL</span><span class="tbadge" id="tbadge-${T.id}"></span></summary><div class="tbody">`
+    + `<div class="tdata">${esc(tr.data)}</div><p class="howto" style="margin:0">${esc(tr.note)} True/False can be typed in any case.</p>`
+    + `<div class="tscroll"><table class="tt"><thead><tr>${tr.cols.map(c => `<th>${esc(c)}</th>`).join("")}</tr></thead><tbody>`
+    + tr.rows.map((r, i) => `<tr>${r.map((_, j) => `<td>${cell(`tc-${T.id}-${i}-${j}`, `Row ${i + 1}, ${tr.cols[j]}`)}</td>`).join("")}</tr>`).join("")
+    + `</tbody></table></div>`;
+  (tr.extra || []).forEach(([name], k) => { h += `<div class="tout"><label for="tx-${T.id}-${k}">${esc(name)} =</label><input type="text" id="tx-${T.id}-${k}" data-tr="${T.id}" spellcheck="false" autocomplete="off"></div>`; });
+  h += `<div class="tout"><label for="to-${T.id}">Output:</label><input type="text" id="to-${T.id}" data-tr="${T.id}" spellcheck="false" autocomplete="off"></div>`
+    + `<div class="bar" style="display:flex;gap:10px;align-items:center;flex-wrap:wrap"><button class="btn" type="button" data-trcheck="${T.id}">Check my trace</button><span class="fb" id="tfb-${T.id}" aria-live="polite"></span></div></div></details>`;
+  return h;
+}
+const tnorm = v => { v = String(v || "").trim().replace(/^"|"$/g, ""); if (/^(true|false)$/i.test(v)) v = v.toLowerCase(); if (v === "-" || v === "–") v = ""; return v; };
+function traceCells(T){
+  const tr = T.trace, list = [];
+  tr.rows.forEach((r, i) => r.forEach((ans, j) => list.push([`tc-${T.id}-${i}-${j}`, ans])));
+  (tr.extra || []).forEach(([, ans], k) => list.push([`tx-${T.id}-${k}`, ans]));
+  list.push([`to-${T.id}`, tr.output]);
+  return list;
+}
+function checkTrace(T, mark){
+  const cells = traceCells(T); let ok = 0;
+  cells.forEach(([id, ans]) => {
+    const el = $("#" + id), v = (S.trace[T.id] || {})[id] || "", good = tnorm(v) === tnorm(ans);
+    if (good) ok++;
+    if (mark){ el.classList.toggle("right", good); el.classList.toggle("wrong", !good && (v.trim() !== "" || tnorm(ans) !== "")); }
+  });
+  return [ok, cells.length];
+}
+function renderTrace(T){
+  if (!T.trace) return;
+  S.trace = S.trace || {}; const st = S.trace[T.id] || {};
+  traceCells(T).forEach(([id]) => { const el = $("#" + id); if (document.activeElement !== el) el.value = st[id] || ""; });
+  const b = $("#tbadge-" + T.id);
+  if (st._checked){ const [ok, n] = checkTrace(T, true); b.textContent = ok === n ? "✓ Trace correct" : `${ok} of ${n} cells right`; b.className = "tbadge" + (ok === n ? " done" : ""); }
+  else { b.textContent = Object.keys(st).length ? "Not checked yet" : ""; b.className = "tbadge"; }
+}
+document.addEventListener("input", e => {
+  const id = e.target.dataset && e.target.dataset.tr; if (!id) return;
+  S.trace = S.trace || {}; S.trace[id] = S.trace[id] || {}; S.trace[id][e.target.id] = e.target.value;
+  e.target.classList.remove("right", "wrong"); save();
+});
+document.addEventListener("click", e => {
+  const b = e.target.closest("[data-trcheck]"); if (!b) return;
+  const T = TASKS.find(t => t.id === b.dataset.trcheck);
+  S.trace = S.trace || {}; S.trace[T.id] = S.trace[T.id] || {}; S.trace[T.id]._checked = true; save();
+  const [ok, n] = checkTrace(T, true), fb = $("#tfb-" + T.id);
+  fb.textContent = ok === n ? "✓ Every cell is right." : `${ok} of ${n} right. Fix the red cells and check again. Blank cells are right when nothing is written in that column on that pass.`;
+  fb.className = "fb " + (ok === n ? "good" : "bad");
+  renderTrace(T);
+});
+document.addEventListener("keydown", e => { if (e.key === "Enter" && e.target.dataset && e.target.dataset.tr){ e.preventDefault(); $(`[data-trcheck="${e.target.dataset.tr}"]`).click(); } });
+
+/* ============================================================ 2.3 game + 2.4 experiment (not scaffolded) */
+const PROGRAMIZ = "https://www.programiz.com/csharp-programming/online-compiler/";
+const GAME_REQS = [
+  "The computer picks a secret whole number from 1 to 100 at random.",
+  "The player keeps guessing until they get it. After each wrong guess print <code>Higher!</code> or <code>Lower!</code>",
+  "Count the player's guesses and print the total when they get it right.",
+  "Build an <code>int</code> array holding 1, 2, 3 … 100 (it is sorted, so binary search will work).",
+  "Call <b>your</b> <code>BinarySearch</code> function from 2.2 to find the secret in that array, counting how many comparisons (guesses) it makes.",
+  "Print how many guesses binary search took and who wins: fewer guesses wins, the same is a draw."
+];
+const GAME_TESTS = [
+  ["A guess below the secret", "Higher!"],
+  ["A guess above the secret", "Lower!"],
+  ["The right guess", "Correct! … You took n guesses."],
+  ["Always guess the middle of what's left", "Draw (binary search can't beat you)"],
+  ["", ""]
+];
+const SIZES = ["1,000", "10,000", "100,000", "1,000,000"];
+const RCOLS = ["Linear checks", "Linear µs", "Binary checks", "Binary µs"];
+const QS = [
+  "Look at the <b>First item</b> row. Which search made fewer comparisons? Why?",
+  "Each list is 10 times bigger than the one before. What happens to the number of linear checks each time? What happens to the binary checks?",
+  "Lesson 1's list <code>{19, 3, 47, 8, 25, 56, 12, 40, 31}</code> was not sorted. What must happen before binary search can be used on it? For a single search, why might linear search still be the better choice?"
+];
+
+function briefsHtml(){
+  const game = `<section class="act brief" id="t23" data-n="3"><header><span class="num">3</span><h2>2.3 Game: Human vs Binary</h2><span class="pill">SHOULD</span><span class="pill">★★★</span><span class="pill navy">NOT SCAFFOLDED</span><span class="badge" id="badge-t23"></span></header>
+    <div class="lockpanel"><p>🔒 Locked. Finish Task 2.2, then type the code your teacher shows you.</p><input type="text" maxlength="12" placeholder="CODE" autocomplete="off" aria-label="Unlock code for task 2.3" id="code-t23"><button class="btn" type="button" data-unlock="3">Unlock</button><span class="lockmsg" id="lockmsg-t23"></span></div>
+    <div class="secbody">
+      <p class="howto">This time there are no line-by-line steps: you write it. You already have every piece you need from 2.1 and 2.2. Can a human beat binary search at <i>guess my number</i>?</p>
+      <div class="twocol">
+        <div><h3 class="sub">What the player sees</h3>
+<div class="console sample">HUMAN vs BINARY
+I'm thinking of a number from 1 to 100.
+Your guess: 50
+Lower!
+Your guess: 25
+Higher!
+   …
+Your guess: 39
+Correct! It was 39. You took 7 guesses.
+Binary search took 7 guesses.
+It's a draw!</div></div>
+        <div><h3 class="sub">Before you code</h3><ol class="steps"><li>Plan it in your book: write the steps as bullet points or ERL.</li><li>Open the <a href="${PROGRAMIZ}" target="_blank" rel="noopener">Programiz C# compiler</a> (it lets you type input while the program runs).</li><li>Paste in your <code>BinarySearch</code> function: <button class="btn ghost sm" type="button" data-copyfn="1">Copy my BinarySearch</button></li><li>Build it a requirement at a time, running after each one.</li><li>Done? Paste it into CodeBash task <b>2.3 Human vs Binary</b> and submit.</li></ol></div>
+      </div>
+      <h3 class="sub">Requirements <span class="mini">tick each one off when it works</span></h3>
+      <div class="reqs">${GAME_REQS.map((r, i) => `<label class="req"><input type="checkbox" data-req="${i}"><span><b>R${i + 1}</b> ${r}</span></label>`).join("")}</div>
+      <details class="trace"><summary>Stuck? Toolbox <span class="pill navy">SYNTAX ONLY</span></summary><div class="tbody">
+        <p class="howto" style="margin:0">These are the bits of C# you haven't used yet. How you put them together is up to you.</p>
+        <div class="code small">${["// a random whole number from 1 to 100 (the 101 is NOT included)", "Random rng = new Random();", "int secret = rng.Next(1, 101);", "", "// print a prompt and stay on the same line", "Console.Write(\"Your guess: \");", "", "// a counter that every function in the class can see", "static int comparisons = 0;     // goes ABOVE your function, not inside Main", "comparisons++;                  // goes inside your while loop"].map(l => `<div class="cl"><span class="src">${l ? hl(l) : " "}</span></div>`).join("")}</div>
+        <p class="howto" style="margin:0"><b>Testing tip:</b> while you build it, add <code>Console.WriteLine(secret);</code> so you know the answer. Delete it before you submit!</p>
+      </div></details>
+      <h3 class="sub">Test plan <span class="mini">fill in the Actual column as you test</span></h3>
+      <div class="tscroll"><table class="tt plan"><thead><tr><th>Test</th><th>Expected</th><th>Actual</th></tr></thead><tbody>
+      ${GAME_TESTS.map(([t, e], i) => `<tr><td>${t ? esc(t) : `<input type="text" data-gt="${i}-t" placeholder="your own test">`}</td><td>${e ? esc(e) : `<input type="text" data-gt="${i}-e">`}</td><td><input type="text" data-gt="${i}-a"></td></tr>`).join("")}
+      </tbody></table></div>
+      <h3 class="sub">Finished? Level up</h3>
+      <ul class="ext"><li><b>★</b> Play again? Keep a best score across rounds.</li><li><b>★★</b> Hard mode: 1 to 1,000. What is the most guesses binary search can ever need now? Predict, then test.</li><li><b>★★★</b> Reverse mode: <i>you</i> think of a number and the computer guesses it with <code>low</code>, <code>high</code> and <code>mid</code>. You type <code>H</code>, <code>L</code> or <code>C</code>.</li><li><b>★★★★</b> Cheat detector: in reverse mode, if your answers are impossible (low passes high) the computer says <code>You're cheating!</code></li></ul>
+    </div></section>`;
+
+  const exp = `<section class="act brief" id="t24" data-n="4"><header><span class="num">4</span><h2>2.4 Experiment: Linear vs Binary</h2><span class="pill navy">HOMEWORK</span><span class="pill">★★</span><span class="badge" id="badge-t24"></span></header>
+    <div class="lockpanel"><p>🔒 Unlocks when Task 2.2 is complete: the experiment uses your own <code>BinarySearch</code>.</p></div>
+    <div class="secbody">
+      <p class="howto">In Lesson 1 you timed a linear search. Now race it against <b>your</b> binary search on the same sorted lists, side by side.</p>
+      <ol class="steps">
+        <li>Copy the experiment program: <button class="btn ghost sm" type="button" data-copyexp="1">Copy experiment code</button></li>
+        <li>Paste it into the <a href="${PROGRAMIZ}" target="_blank" rel="noopener">Programiz C# compiler</a>.</li>
+        <li><b>STEP 1</b> in the code: delete the placeholder <code>BinarySearch</code> and paste yours: <button class="btn ghost sm" type="button" data-copyfn="1">Copy my BinarySearch</button></li>
+        <li><b>STEP 2</b> in the code: add <code>comparisons++;</code> as the <b>first line inside your while loop</b>, so every check is counted.</li>
+        <li>Run it. The first line must say <code>Your BinarySearch passed the check.</code> If not, fix your function.</li>
+        <li>Set <code>int size</code> to 1000, 10000, 100000 then 1000000. Run each size <b>3 times</b> and record the <b>middle</b> result from the <b>Last item</b> row below.</li>
+        <li>Answer the questions, press <b>Copy my results</b>, paste into CodeBash task <b>Experiment: Time a Binary Search</b> and submit.</li>
+      </ol>
+      <h3 class="sub">Results: Last item row</h3>
+      <div class="tscroll"><table class="tt res"><thead><tr><th>List size</th>${RCOLS.map(c => `<th>${c}</th>`).join("")}<th>Binary was … × faster</th></tr></thead><tbody>
+      ${SIZES.map((s, i) => `<tr><th class="rowh">${s}</th>${RCOLS.map((_, j) => `<td><input type="text" inputmode="decimal" data-res="${i}-${j}"></td>`).join("")}<td class="times" id="times-${i}">–</td></tr>`).join("")}
+      </tbody></table></div>
+      <h3 class="sub">What did you find?</h3>
+      ${QS.map((q, i) => `<label class="q"><span>${i + 1}. ${q}</span><textarea data-q="${i}" rows="3"></textarea></label>`).join("")}
+      <div class="bar"><button class="btn gold" type="button" id="copyres">Copy my results</button><span class="fb" id="resfb"></span></div>
+    </div></section>`;
+  return game + exp;
+}
+
+/* starter code for the experiment */
+const EXP_SRC = document.getElementById("expsrc").textContent.replace(/^\n/, "");
+
+function myFunctionText(){
+  const lines = assemble(TASKS[1], -1).map(l => l.txt);
+  const a = lines.findIndex(l => l.includes("static int BinarySearch"));
+  let b = a; while (b < lines.length && lines[b] !== "    }") b++;
+  return lines.slice(a, b + 1).join("\n") + "\n";
+}
+
+function setupBriefs(){
+  app.insertAdjacentHTML("beforeend", briefsHtml());
+  S.game = S.game || {}; S.exp = S.exp || {};
+  // unlock 2.3 with a code
+  const go = () => {
+    const msg = $("#lockmsg-t23"), inp = $("#code-t23");
+    if (!taskDone(TASKS[1])){ msg.textContent = "Finish Task 2.2 first."; return; }
+    if (lhashRaw(inp.value.trim().toUpperCase()) === LOCKS[3]){ if (!S.unlocked.includes("3")) S.unlocked.push("3"); save(); renderAll(); $("#t23").scrollIntoView({behavior:"smooth", block:"start"}); }
+    else msg.textContent = "That code isn't right. Check the board.";
+  };
+  $('[data-unlock="3"]').addEventListener("click", go);
+  $("#code-t23").addEventListener("keydown", e => { if (e.key === "Enter") go(); });
+  // restore saved inputs
+  $$("[data-req]").forEach(el => { el.checked = !!(S.game.req || {})[el.dataset.req]; });
+  $$("[data-gt]").forEach(el => { el.value = (S.game.tests || {})[el.dataset.gt] || ""; });
+  $$("[data-res]").forEach(el => { el.value = (S.exp.res || {})[el.dataset.res] || ""; });
+  $$("[data-q]").forEach(el => { el.value = (S.exp.q || {})[el.dataset.q] || ""; });
+  document.addEventListener("input", e => {
+    const d = e.target.dataset || {};
+    if (d.req !== undefined){ (S.game.req = S.game.req || {})[d.req] = e.target.checked; save(); renderBriefs(); }
+    if (d.gt !== undefined){ (S.game.tests = S.game.tests || {})[d.gt] = e.target.value; save(); }
+    if (d.res !== undefined){ (S.exp.res = S.exp.res || {})[d.res] = e.target.value; save(); renderBriefs(); }
+    if (d.q !== undefined){ (S.exp.q = S.exp.q || {})[d.q] = e.target.value; save(); }
+  });
+  document.addEventListener("click", async e => {
+    const f = e.target.closest("[data-copyfn]"), x = e.target.closest("[data-copyexp]");
+    if (f) await copyText(f, taskDone(TASKS[1]) ? myFunctionText() : null, "Finish 2.2 first");
+    if (x) await copyText(x, EXP_SRC);
+    if (e.target.id === "copyres") await copyText(e.target, resultsText());
+  });
+}
+async function copyText(btn, txt, failMsg){
+  const old = btn.dataset.label || (btn.dataset.label = btn.textContent);
+  if (txt === null){ btn.textContent = failMsg; setTimeout(() => btn.textContent = old, 2000); return; }
+  try { await navigator.clipboard.writeText(txt); btn.textContent = "Copied ✓"; }
+  catch (err) { const ta = document.createElement("textarea"); ta.value = txt; document.body.appendChild(ta); ta.select(); try { document.execCommand("copy"); btn.textContent = "Copied ✓"; } catch (e2) { btn.textContent = "Copy failed"; } ta.remove(); }
+  setTimeout(() => btn.textContent = old, 2200);
+}
+const num = v => parseFloat(String(v || "").replace(/,/g, ""));
+function timesFaster(i){
+  const r = S.exp.res || {}, lin = num(r[`${i}-1`]), bin = num(r[`${i}-3`]);
+  return lin > 0 && bin > 0 ? Math.round(lin / bin).toLocaleString("en-GB") : "–";
+}
+function resultsText(){
+  const r = S.exp.res || {}, q = S.exp.q || {};
+  let t = `/* Experiment: Linear vs Binary · ${S.who || "(name)"} ${S.cls || ""}\n   Last item row, middle of 3 runs\n\n   Size        Lin checks   Lin us      Bin checks   Bin us     Times faster\n`;
+  SIZES.forEach((s, i) => { t += "   " + s.padEnd(12) + [0, 1, 2, 3].map(j => String(r[`${i}-${j}`] || "").padEnd(13)).join("") + timesFaster(i) + "\n"; });
+  QS.forEach((qq, i) => { t += `\n   Q${i + 1}. ${(q[i] || "").trim()}\n`; });
+  return t + "*/\n";
+}
+function renderBriefs(){
+  const open3 = TEACHER || S.unlocked.includes("3"), open4 = TEACHER || taskDone(TASKS[1]);
+  $("#t23").classList.toggle("locked", !open3); $("#t24").classList.toggle("locked", !open4);
+  const ticks = Object.values(S.game.req || {}).filter(Boolean).length;
+  const b3 = $("#badge-t23"); b3.textContent = !open3 ? "🔒 Locked" : `${ticks} of ${GAME_REQS.length} requirements`; b3.className = "badge" + (ticks === GAME_REQS.length ? " done" : "");
+  const filled = Object.values(S.exp.res || {}).filter(v => String(v).trim()).length;
+  const b4 = $("#badge-t24"); b4.textContent = !open4 ? "🔒 Locked" : `${filled} of 16 results`; b4.className = "badge" + (filled === 16 ? " done" : "");
+  SIZES.forEach((_, i) => { $("#times-" + i).textContent = timesFaster(i); });
+}
+
+setupBriefs();
+
+/* name + class */
+["who", "cls"].forEach(id => { const el = $("#" + id); el.value = S[id] || ""; el.addEventListener("input", () => { S[id] = el.value; save(); }); });
+
+const foot = document.createElement("div"); foot.className = "status";
+foot.innerHTML = `<span>Your answers save in this browser on this device.</span><button class="btn ghost" type="button" id="wipe">Start again</button><span id="wipeask" hidden>Clear every line and trace table, and lock Tasks 2.2–2.4 again? <button class="btn" type="button" id="wipeyes">Yes, clear</button> <button class="btn ghost" type="button" id="wipeno">Cancel</button></span>`;
+app.appendChild(foot);
+$("#wipe").onclick = () => $("#wipeask").hidden = false;
+$("#wipeno").onclick = () => $("#wipeask").hidden = true;
+$("#wipeyes").onclick = () => { S = {ans:{}, unlocked:["1"], tries:{}, trace:{}, game:{}, exp:{}}; $$("[data-req]").forEach(x => x.checked = false); $$("[data-gt],[data-res],[data-q]").forEach(x => x.value = ""); $$("details.trace input").forEach(i => i.classList.remove("right","wrong")); $$("[id^=tfb-]").forEach(x => x.textContent = ""); try { localStorage.removeItem(KEY); } catch (e) {} TASKS.forEach(T => T.lines.forEach(r => { $("#fb-" + r.key).textContent = ""; $("#hint-" + r.key).hidden = true; $("#row-" + r.key).classList.remove("wrong"); })); $("#wipeask").hidden = true; renderAll(); };
+
+renderAll();
+</script>
+</body>
+</html>
