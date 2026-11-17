@@ -5,6 +5,7 @@ Static site for GitHub Pages. No build step.
 ```
 index.html            landing page (links to each lesson)
 lesson-1/index.html   Lesson 1 · Linear Search Code Builder (CodeBash tasks 1.1–1.3)
+lesson-2/index.html   Lesson 2 · Binary Search Code Builder (CodeBash tasks 2.1–2.4)
 .nojekyll
 ```
 
@@ -16,3 +17,10 @@ Live at https://eltham-college-cs.github.io/y10-searching-sorting/lesson-1/
 - Optional trace table per task (checked, not required to move on).
 - Teacher mode: add `#teacher` to the URL. Opens all tasks, shows the codes and a ▶ Model button that types each line live.
 - Answers save in the browser (localStorage) on that device. Nothing is sent anywhere.
+
+## Lesson 2 · Binary Search Code Builder
+- 2.1 Binary Search Step by Step (in Main) and 2.2 Binary Search Function (from ERL): same line-by-line engine as Lesson 1. Every line carries a coloured tag for the part of the algorithm it belongs to (bounds, loop, midpoint, found, discard left, discard right, not found), matching the slides.
+- Unlock codes: 2.2 `HALVE`, 2.3 `MIDDLE`. 2.4 opens automatically once 2.2 is complete.
+- 2.3 Game: Human vs Binary is not scaffolded: brief, requirements checklist, syntax-only toolbox, test plan, extensions. Built in the Programiz online compiler.
+- 2.4 Experiment (homework): copy the experiment program, paste in your own BinarySearch, record the Last item row for four list sizes; the page works out "times faster" and builds a results block to paste into CodeBash.
+- Saves under localStorage key `y10-binary-builder-v1`. Teacher mode: `#teacher`.
