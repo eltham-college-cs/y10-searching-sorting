@@ -1,0 +1,247 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>The Sorting Race: bubble vs insertion vs merge</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;600;700;800&display=swap" rel="stylesheet">
+<style>
+:root{--navy:#0A1B2E;--gold:#C89B3C;--cream:#FFF4DC;--grey:#54657A;--line:#C3CDD8;--bg:#F7F8FA;
+--bub:#B3261E;--ins:#2F6FD6;--mer:#1F7A4D}
+*{box-sizing:border-box}
+body{margin:0;font-family:Montserrat,Arial,sans-serif;background:var(--bg);color:var(--navy)}
+header{background:var(--navy);color:#fff;padding:22px 32px;border-bottom:4px solid var(--gold)}
+header small{color:var(--gold);font-weight:800;letter-spacing:1.5px;font-size:12px}
+header h1{margin:4px 0 2px;font-size:30px}
+header p{margin:0;color:#cfd7e2}
+main{max-width:1180px;margin:0 auto;padding:24px 32px 60px}
+.card{background:#fff;border:1.5px solid var(--line);border-radius:12px;padding:20px 22px;margin-bottom:20px}
+h2{margin:0 0 6px;font-size:22px}
+h2 .tag{display:inline-block;background:var(--navy);color:var(--gold);font-size:12px;letter-spacing:1.3px;padding:4px 10px;border-radius:12px;vertical-align:middle;margin-right:8px}
+.sub{color:var(--grey);margin:0 0 14px}
+.steps{background:var(--cream);border:2px solid var(--gold);border-radius:10px;padding:12px 18px}
+.steps ol{margin:6px 0;padding-left:22px}.steps li{margin:4px 0}
+.controls{display:flex;flex-wrap:wrap;gap:14px;align-items:end;margin:6px 0 16px}
+label{font-size:12px;font-weight:800;letter-spacing:1.2px;color:var(--grey);display:block;margin-bottom:4px}
+select,button{font:inherit;font-size:16px;padding:9px 12px;border-radius:8px;border:1.5px solid var(--line);background:#fff;color:var(--navy)}
+button{background:var(--navy);color:#fff;border-color:var(--navy);font-weight:700;cursor:pointer}
+button.gold{background:var(--gold);border-color:var(--gold);color:var(--navy)}
+button.ghost{background:#fff;color:var(--navy)}
+button:disabled{opacity:.5;cursor:wait}
+.lanes{display:grid;grid-template-columns:repeat(3,1fr);gap:14px}
+.lane{border:1.5px solid var(--line);border-radius:10px;padding:10px;background:#fbfcfd}
+.lane h3{margin:0 0 6px;font-size:16px;display:flex;justify-content:space-between;align-items:center}
+.lane canvas{width:100%;height:170px;display:block;background:#fff;border-radius:6px}
+.lane .stat{font-size:14px;color:var(--grey);margin-top:6px}
+.lane .stat b{color:var(--navy);font-size:18px}
+.done{font-size:12px;font-weight:800;padding:3px 8px;border-radius:10px;background:var(--navy);color:var(--gold);visibility:hidden}
+.bars{margin-top:8px}
+.bar{display:grid;grid-template-columns:130px 1fr 230px;gap:10px;align-items:center;margin:8px 0}
+.bar .track{background:#EDF0F4;border-radius:6px;height:26px;overflow:hidden}
+.bar .fill{height:100%;width:0;border-radius:6px;transition:width .6s}
+.bar .num{font-family:Consolas,monospace;font-weight:700}
+table{border-collapse:collapse;width:100%;font-size:15px}
+th,td{border:1px solid var(--line);padding:7px 10px;text-align:right}
+th{background:var(--navy);color:#fff;font-size:13px;letter-spacing:.5px}
+th:first-child,td:first-child,th:nth-child(2),td:nth-child(2){text-align:left}
+td{font-family:Consolas,monospace}
+.b{color:var(--bub)}.i{color:var(--ins)}.m{color:var(--mer)}
+.qs li{margin:10px 0;line-height:1.45}
+.note{font-size:13px;color:var(--grey)}
+.msg{font-weight:700;color:var(--mer);margin-left:8px}
+.must{color:var(--navy)}.should{color:#A17A22}.could{color:#5B3E8C}
+.lvl{font-size:12px;font-weight:800;letter-spacing:1.3px}
+@media(max-width:900px){.lanes{grid-template-columns:1fr}.bar{grid-template-columns:100px 1fr}.bar .num{grid-column:2}}
+</style>
+</head>
+<body>
+<header>
+  <small>YEAR 10 · OCR J277 2.1.3 · COMPUTER TASK</small>
+  <h1>The Sorting Race</h1>
+  <p>Bubble sort vs insertion sort vs merge sort. Which is fastest, and does it depend on the list?</p>
+</header>
+<main>
+
+<div class="card">
+  <h2><span class="tag">PART 1</span>Watch the race</h2>
+  <p class="sub">All three sorts get the SAME 40 numbers. Each tick, every sort makes the same number of comparisons. The one that needs the fewest comparisons finishes first.</p>
+  <div class="controls">
+    <div><label>LIST TYPE</label>
+      <select id="raceType"><option value="random">Random</option><option value="nearly">Nearly sorted</option><option value="reversed">Reversed</option></select></div>
+    <div><label>SPEED</label>
+      <select id="raceSpeed"><option value="2">Slow</option><option value="8" selected>Medium</option><option value="30">Fast</option></select></div>
+    <button class="gold" id="raceBtn">▶ Start the race</button>
+  </div>
+  <p class="note" style="margin:0 0 10px"><b>Predict first:</b> before you click, write in OneNote which sort you think will win, and why.</p>
+  <div class="lanes">
+    <div class="lane"><h3><span class="b">Bubble sort</span><span class="done" id="d0">1st</span></h3><canvas id="c0" width="400" height="170"></canvas><div class="stat">Comparisons: <b id="s0">0</b></div></div>
+    <div class="lane"><h3><span class="i">Insertion sort</span><span class="done" id="d1">1st</span></h3><canvas id="c1" width="400" height="170"></canvas><div class="stat">Comparisons: <b id="s1">0</b></div></div>
+    <div class="lane"><h3><span class="m">Merge sort</span><span class="done" id="d2">1st</span></h3><canvas id="c2" width="400" height="170"></canvas><div class="stat">Comparisons: <b id="s2">0</b></div></div>
+  </div>
+</div>
+
+<div class="card">
+  <h2><span class="tag">PART 2</span>The experiment</h2>
+  <p class="sub">The computer sorts a big list with all three algorithms, counts every comparison and times each sort.</p>
+  <div class="steps"><b>Method</b>
+    <ol>
+      <li>Set the <b>list type</b> to <b>Random</b> and the <b>size</b> to <b>1,000</b>. Click <b>Run experiment</b>.</li>
+      <li>Repeat for <b>2,000</b>, <b>4,000</b> and <b>8,000</b> items (Random).</li>
+      <li>Set the size to <b>4,000</b>. Run it with <b>Nearly sorted</b>, then with <b>Reversed</b>.</li>
+      <li>Every run is added to the results table below. Click <b>Copy results</b> and paste the table into your OneNote page.</li>
+      <li>Answer the questions in Part 3.</li>
+    </ol>
+  </div>
+  <div class="controls" style="margin-top:16px">
+    <div><label>LIST TYPE</label>
+      <select id="expType"><option value="random">Random</option><option value="nearly">Nearly sorted</option><option value="reversed">Reversed</option></select></div>
+    <div><label>SIZE (ITEMS)</label>
+      <select id="expSize"><option>1000</option><option>2000</option><option>4000</option><option>8000</option></select></div>
+    <button id="runBtn">Run experiment</button>
+    <span class="msg" id="runMsg"></span>
+  </div>
+  <div class="bars" id="bars">
+    <div class="bar"><b class="b">Bubble</b><div class="track"><div class="fill" id="f0" style="background:var(--bub)"></div></div><span class="num" id="n0">–</span></div>
+    <div class="bar"><b class="i">Insertion</b><div class="track"><div class="fill" id="f1" style="background:var(--ins)"></div></div><span class="num" id="n1">–</span></div>
+    <div class="bar"><b class="m">Merge</b><div class="track"><div class="fill" id="f2" style="background:var(--mer)"></div></div><span class="num" id="n2">–</span></div>
+    <p class="note">Bar length = number of comparisons (longest bar = most work).</p>
+  </div>
+</div>
+
+<div class="card">
+  <h2><span class="tag">RESULTS</span>Your results table</h2>
+  <p class="sub">Comparisons are the fair test: they are the same on every computer. Times change with the computer and what else it is doing.</p>
+  <table>
+    <thead><tr><th>List type</th><th>Items</th><th>Bubble comparisons</th><th>Insertion comparisons</th><th>Merge comparisons</th><th>Bubble ms</th><th>Insertion ms</th><th>Merge ms</th></tr></thead>
+    <tbody id="tbody"><tr><td colspan="8" style="text-align:center;font-family:Montserrat;color:#54657A">No runs yet: click Run experiment.</td></tr></tbody>
+  </table>
+  <div class="controls" style="margin:14px 0 0">
+    <button class="ghost" id="copyBtn">Copy results</button>
+    <button class="ghost" id="clearBtn">Clear table</button>
+    <span class="msg" id="copyMsg"></span>
+  </div>
+</div>
+
+<div class="card">
+  <h2><span class="tag">PART 3</span>Questions: answer in OneNote</h2>
+  <ol class="qs">
+    <li><span class="lvl must">MUST</span> Look at your Random results. Which sort made the <b>most</b> comparisons? Which made the <b>fewest</b>?</li>
+    <li><span class="lvl must">MUST</span> Were you right about the winner of the race in Part 1? Explain what you saw.</li>
+    <li><span class="lvl should">SHOULD</span> When the list size doubles (1,000 → 2,000 → 4,000 → 8,000), roughly how many times bigger does the number of comparisons get for <b>bubble sort</b>? For <b>insertion sort</b>? For <b>merge sort</b>?</li>
+    <li><span class="lvl should">SHOULD</span> Use your doubling pattern to <b>predict</b> how many comparisons bubble sort would make for 16,000 items. Then explain why bubble sort is a bad choice for very large lists.</li>
+    <li><span class="lvl should">SHOULD</span> Look at your 4,000 <b>Nearly sorted</b> result. Which sort won? Explain <b>why</b>, using what each algorithm does.</li>
+    <li><span class="lvl could">COULD</span> Look at your 4,000 <b>Reversed</b> result. Why is a reversed list the worst case for bubble and insertion sort, but makes little difference to merge sort?</li>
+    <li><span class="lvl could">COULD</span> Merge sort won the random race. Give one reason a programmer might still choose insertion sort instead.</li>
+    <li><span class="lvl could">COULD</span> Why do we compare <b>comparisons</b> rather than <b>milliseconds</b> to decide which algorithm is better?</li>
+  </ol>
+</div>
+<p class="note">How it counts: bubble sort compares every neighbouring pair each pass and stops after a pass with no swaps (as in class). Insertion sort counts each comparison with the item to the left. Merge sort counts each comparison while merging.</p>
+</main>
+
+<script>
+// ---------- list makers ----------
+function makeList(n, type){
+  const a = Array.from({length:n}, (_, i) => i + 1);
+  if (type === 'random') { for (let i = n - 1; i > 0; i--) { const j = Math.floor(Math.random() * (i + 1)); [a[i], a[j]] = [a[j], a[i]]; } }
+  else if (type === 'reversed') a.reverse();
+  else { // nearly sorted: swap about 2% of neighbouring pairs
+    const k = Math.max(2, Math.round(n * 0.02));
+    for (let s = 0; s < k; s++) { const i = Math.floor(Math.random() * (n - 1)); [a[i], a[i + 1]] = [a[i + 1], a[i]]; }
+  }
+  return a;
+}
+
+// ---------- counting sorts (for the experiment) ----------
+function bubbleCount(a){ let c = 0, swapped = true; const n = a.length;
+  while (swapped) { swapped = false;
+    for (let j = 0; j < n - 1; j++) { c++; if (a[j] > a[j + 1]) { const t = a[j]; a[j] = a[j + 1]; a[j + 1] = t; swapped = true; } } }
+  return c; }
+function insertionCount(a){ let c = 0;
+  for (let i = 1; i < a.length; i++) { const cur = a[i]; let j = i - 1;
+    while (j >= 0) { c++; if (a[j] > cur) { a[j + 1] = a[j]; j--; } else break; }
+    a[j + 1] = cur; }
+  return c; }
+function mergeCount(a){ let c = 0;
+  function ms(x){ if (x.length <= 1) return x; const m = Math.floor(x.length / 2); const L = ms(x.slice(0, m)), R = ms(x.slice(m));
+    const o = []; let i = 0, j = 0;
+    while (i < L.length && j < R.length) { c++; if (L[i] <= R[j]) o.push(L[i++]); else o.push(R[j++]); }
+    while (i < L.length) o.push(L[i++]); while (j < R.length) o.push(R[j++]); return o; }
+  ms(a); return c; }
+
+const rows = [];
+const fmt = n => n.toLocaleString('en-GB');
+const $ = id => document.getElementById(id);
+
+function runExperiment(){
+  const n = +$('expSize').value, type = $('expType').value;
+  $('runBtn').disabled = true; $('runMsg').textContent = 'Sorting… (bubble sort takes the longest)';
+  setTimeout(() => {
+    const base = makeList(n, type), fns = [bubbleCount, insertionCount, mergeCount], comps = [], ms = [];
+    fns.forEach(f => { const copy = base.slice(); const t0 = performance.now(); comps.push(f(copy)); ms.push(performance.now() - t0); });
+    const max = Math.max(...comps);
+    comps.forEach((c, i) => { $('f' + i).style.width = Math.max(0.5, c / max * 100) + '%'; $('n' + i).textContent = fmt(c) + ' · ' + ms[i].toFixed(1) + ' ms'; });
+    rows.push({ type: { random: 'Random', nearly: 'Nearly sorted', reversed: 'Reversed' }[type], n, comps, ms });
+    drawTable(); $('runBtn').disabled = false; $('runMsg').textContent = 'Done: added to the results table.';
+  }, 30);
+}
+function drawTable(){
+  if (!rows.length) { $('tbody').innerHTML = '<tr><td colspan="8" style="text-align:center;font-family:Montserrat;color:#54657A">No runs yet: click Run experiment.</td></tr>'; return; }
+  $('tbody').innerHTML = rows.map(r => `<tr><td style="font-family:Montserrat">${r.type}</td><td>${fmt(r.n)}</td>${r.comps.map(c => `<td>${fmt(c)}</td>`).join('')}${r.ms.map(m => `<td>${m.toFixed(1)}</td>`).join('')}</tr>`).join('');
+}
+$('runBtn').onclick = runExperiment;
+$('clearBtn').onclick = () => { rows.length = 0; drawTable(); $('copyMsg').textContent = ''; };
+$('copyBtn').onclick = async () => {
+  const head = ['List type','Items','Bubble comparisons','Insertion comparisons','Merge comparisons','Bubble ms','Insertion ms','Merge ms'];
+  const text = [head, ...rows.map(r => [r.type, r.n, ...r.comps, ...r.ms.map(m => m.toFixed(1))])].map(r => r.join('\t')).join('\n');
+  try { await navigator.clipboard.writeText(text); $('copyMsg').textContent = 'Copied: paste into OneNote.'; }
+  catch (e) { $('copyMsg').textContent = 'Copy blocked: select the table with your mouse and copy it instead.'; }
+};
+
+// ---------- the visual race (step-by-step generators) ----------
+function* bubbleGen(a){ let swapped = true; const n = a.length;
+  while (swapped) { swapped = false;
+    for (let j = 0; j < n - 1; j++) { yield [j, j + 1]; if (a[j] > a[j + 1]) { [a[j], a[j + 1]] = [a[j + 1], a[j]]; swapped = true; } } } }
+function* insertionGen(a){
+  for (let i = 1; i < a.length; i++) { const cur = a[i]; let j = i - 1;
+    while (j >= 0) { yield [j, j + 1]; if (a[j] > cur) { a[j + 1] = a[j]; a[j] = cur; j--; } else break; } } }
+function* mergeGen(a){
+  function* ms(lo, hi){ if (hi - lo <= 1) return; const m = lo + Math.floor((hi - lo) / 2);
+    yield* ms(lo, m); yield* ms(m, hi);
+    const L = a.slice(lo, m), R = a.slice(m, hi); let i = 0, j = 0, k = lo;
+    while (i < L.length && j < R.length) { yield [lo + i, m + j]; if (L[i] <= R[j]) a[k++] = L[i++]; else a[k++] = R[j++];
+      // keep the picture honest: show the unmerged items after k
+      const rest = L.slice(i).concat(R.slice(j)); for (let r = 0; r < rest.length; r++) a[k + r] = rest[r]; }
+    while (i < L.length) a[k++] = L[i++]; while (j < R.length) a[k++] = R[j++]; }
+  yield* ms(0, a.length); }
+
+const colours = ['#B3261E', '#2F6FD6', '#1F7A4D'];
+function draw(ci, a, hl, finished){
+  const cv = $('c' + ci), ctx = cv.getContext('2d'), w = cv.width, h = cv.height, bw = w / a.length;
+  ctx.clearRect(0, 0, w, h);
+  a.forEach((v, i) => { ctx.fillStyle = finished ? colours[ci] : (hl && (i === hl[0] || i === hl[1]) ? '#C89B3C' : '#C3CDD8');
+    const bh = v / a.length * (h - 6); ctx.fillRect(i * bw + 1, h - bh, bw - 2, bh); });
+}
+let raceTimer = null;
+function startRace(){
+  cancelAnimationFrame(raceTimer);
+  const base = makeList(40, $('raceType').value), per = +$('raceSpeed').value;
+  const arrs = [base.slice(), base.slice(), base.slice()], gens = [bubbleGen(arrs[0]), insertionGen(arrs[1]), mergeGen(arrs[2])];
+  const comps = [0, 0, 0], done = [false, false, false]; let place = 0; const places = ['1st', '2nd', '3rd'];
+  [0, 1, 2].forEach(i => { $('d' + i).style.visibility = 'hidden'; $('s' + i).textContent = 0; draw(i, arrs[i]); });
+  $('raceBtn').textContent = '↻ Restart the race';
+  function tick(){
+    const finishedThisTick = [];
+    for (let i = 0; i < 3; i++) { if (done[i]) continue; let hl = null;
+      for (let s = 0; s < per; s++) { const r = gens[i].next(); if (r.done) { done[i] = true; finishedThisTick.push(i); break; } comps[i]++; hl = r.value; }
+      $('s' + i).textContent = fmt(comps[i]); draw(i, arrs[i], hl, done[i]); }
+    finishedThisTick.sort((x, y) => comps[x] - comps[y]).forEach(i => { $('d' + i).textContent = places[place++]; $('d' + i).style.visibility = 'visible'; });
+    if (done.some(d => !d)) raceTimer = requestAnimationFrame(tick);
+  }
+  raceTimer = requestAnimationFrame(tick);
+}
+$('raceBtn').onclick = startRace;
+[0, 1, 2].forEach(i => draw(i, makeList(40, 'random')));
+</script>
+</body>
+</html>
